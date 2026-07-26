@@ -127,7 +127,7 @@
         .input-group input {
             width: 100%;
             padding: 14px 16px;
-            padding-right: 48px; /* ruang untuk ikon mata */
+            padding-right: 48px;
             border: 2px solid var(--border);
             border-radius: var(--radius-sm);
             font-size: 1rem;
@@ -193,19 +193,6 @@
         .btn-primary:active {
             transform: translateY(0);
             box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
-        }
-
-        .btn-danger-outline {
-            background: transparent;
-            color: var(--danger);
-            border: 2px solid var(--danger);
-            padding: 8px 16px;
-            font-size: 0.8rem;
-            border-radius: 8px;
-        }
-        .btn-danger-outline:hover {
-            background: var(--danger);
-            color: #fff;
         }
 
         .btn-logout {
@@ -331,7 +318,6 @@
         .card.income .value { color: var(--success); }
         .card.expense .value { color: var(--danger); }
 
-        /* Form tambah transaksi dengan layout baru */
         .form-card {
             background: var(--card-bg);
             border-radius: var(--radius);
@@ -363,10 +349,6 @@
             transition: all var(--transition);
             outline: none;
             color: var(--text);
-        }
-        .form-row input[type="date"] {
-            padding: 12px 14px;
-            /* styling uniform */
         }
         .form-row input:focus,
         .form-row select:focus {
@@ -527,9 +509,7 @@
 
     <div class="app-container" id="appContainer">
 
-        <!-- ========================================================
-        HALAMAN LOGIN
-        ======================================================== -->
+        <!-- HALAMAN LOGIN -->
         <div class="login-page" id="loginPage">
             <div class="login-card">
                 <div class="login-icon">🔐</div>
@@ -544,9 +524,7 @@
             </div>
         </div>
 
-        <!-- ========================================================
-        HALAMAN DASHBOARD
-        ======================================================== -->
+        <!-- HALAMAN DASHBOARD -->
         <div class="dashboard-page hidden" id="dashboardPage">
             <div class="dashboard-header">
                 <div class="brand" id="brandLogo" title="Klik untuk pengaturan rahasia">
@@ -571,7 +549,7 @@
                 </div>
             </div>
 
-            <!-- Form Tambah Transaksi dengan kalender & nominal auto-format -->
+            <!-- Form Tambah Transaksi -->
             <div class="form-card">
                 <h3>✍️ Catat Transaksi Baru</h3>
                 <div class="form-row">
@@ -592,17 +570,14 @@
                 <h3>📋 Riwayat Transaksi</h3>
                 <div id="transactionList">
                     <div class="empty-state">
-                        <div class="icon">📭</div>
-                        <p>Belum ada transaksi tercatat.</p>
-                        <p style="font-size:0.8rem;color:#94a3b8;">Mulai dengan menambahkan transaksi di atas.</p>
+                        <div class="icon">⏳</div>
+                        <p>Memuat data dari server...</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ========================================================
-        MODAL GANTI PASSWORD (dengan ikon mata di setiap input)
-        ======================================================== -->
+        <!-- MODAL GANTI PASSWORD -->
         <div class="modal-overlay hidden" id="passwordModal">
             <div class="modal-card">
                 <h3>🔒 Ganti Password</h3>
@@ -628,431 +603,347 @@
 
     </div>
 
-    <script>
-        (function() {
-            // ============================================================
-            // KONSTANTA & STORAGE KEYS
-            // ============================================================
-            const DEFAULT_PASSWORD = 'PeranKawan';
-            const STORAGE_KEY_TRANSACTIONS = 'kas_transactions';
-            const STORAGE_KEY_SESSION = 'kas_session_logged_in';
-            const STORAGE_KEY_PASSWORD = 'kas_password';
+    <!-- SCRIPT FIREBASE & LOGIKANYA DIUBAH MENJADI TYPE MODULE -->
+    <script type="module">
+        // 1. Import Firebase SDK versi terbaru
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-            // ============================================================
-            // REFERENSI DOM
-            // ============================================================
-            const loginPage = document.getElementById('loginPage');
-            const dashboardPage = document.getElementById('dashboardPage');
-            const passwordInput = document.getElementById('passwordInput');
-            const loginBtn = document.getElementById('loginBtn');
-            const loginError = document.getElementById('loginError');
-            const logoutBtn = document.getElementById('logoutBtn');
+        // 2. Konfigurasi Firebase dari akunmu
+        const firebaseConfig = {
+            apiKey: "AIzaSyCuMU7sMromx3L_O51ARd2w9_8UWrbyyLg",
+            authDomain: "kas-karang-taruna-9df5a.firebaseapp.com",
+            projectId: "kas-karang-taruna-9df5a",
+            storageBucket: "kas-karang-taruna-9df5a.firebasestorage.app",
+            messagingSenderId: "269127453142",
+            appId: "1:269127453142:web:3b9c6a99f3dbb3d49bfc77"
+        };
 
-            const balanceDisplay = document.getElementById('balanceDisplay');
-            const incomeDisplay = document.getElementById('incomeDisplay');
-            const expenseDisplay = document.getElementById('expenseDisplay');
-            const descInput = document.getElementById('descInput');
-            const dateInput = document.getElementById('dateInput');
-            const amountInput = document.getElementById('amountInput');
-            const typeSelect = document.getElementById('typeSelect');
-            const addTransactionBtn = document.getElementById('addTransactionBtn');
-            const transactionList = document.getElementById('transactionList');
+        // 3. Inisialisasi Aplikasi dan Database
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-            // Modal ganti password
-            const brandLogo = document.getElementById('brandLogo');
-            const passwordModal = document.getElementById('passwordModal');
-            const oldPasswordInput = document.getElementById('oldPasswordInput');
-            const newPasswordInput = document.getElementById('newPasswordInput');
-            const confirmPasswordInput = document.getElementById('confirmPasswordInput');
-            const modalError = document.getElementById('modalError');
-            const modalSuccess = document.getElementById('modalSuccess');
-            const savePasswordBtn = document.getElementById('savePasswordBtn');
-            const closeModalBtn = document.getElementById('closeModalBtn');
+        // ============================================================
+        // KONSTANTA & STORAGE KEYS (Untuk Login)
+        // ============================================================
+        const DEFAULT_PASSWORD = 'PeranKawan';
+        const STORAGE_KEY_SESSION = 'kas_session_logged_in';
+        const STORAGE_KEY_PASSWORD = 'kas_password';
 
-            // ============================================================
-            // DATA TRANSAKSI
-            // ============================================================
-            let transactions = [];
+        // ============================================================
+        // REFERENSI DOM
+        // ============================================================
+        const loginPage = document.getElementById('loginPage');
+        const dashboardPage = document.getElementById('dashboardPage');
+        const passwordInput = document.getElementById('passwordInput');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginError = document.getElementById('loginError');
+        const logoutBtn = document.getElementById('logoutBtn');
 
-            // ============================================================
-            // HELPER FUNCTIONS
-            // ============================================================
-            // Format mata uang dengan dua desimal (contoh: Rp2.000,00)
-            function formatRupiah(angka) {
-                return new Intl.NumberFormat('id-ID', {
-                    style: 'currency',
-                    currency: 'IDR',
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                }).format(angka);
+        const balanceDisplay = document.getElementById('balanceDisplay');
+        const incomeDisplay = document.getElementById('incomeDisplay');
+        const expenseDisplay = document.getElementById('expenseDisplay');
+        const descInput = document.getElementById('descInput');
+        const dateInput = document.getElementById('dateInput');
+        const amountInput = document.getElementById('amountInput');
+        const typeSelect = document.getElementById('typeSelect');
+        const addTransactionBtn = document.getElementById('addTransactionBtn');
+        const transactionList = document.getElementById('transactionList');
+
+        const brandLogo = document.getElementById('brandLogo');
+        const passwordModal = document.getElementById('passwordModal');
+        const oldPasswordInput = document.getElementById('oldPasswordInput');
+        const newPasswordInput = document.getElementById('newPasswordInput');
+        const confirmPasswordInput = document.getElementById('confirmPasswordInput');
+        const modalError = document.getElementById('modalError');
+        const modalSuccess = document.getElementById('modalSuccess');
+        const savePasswordBtn = document.getElementById('savePasswordBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        let transactions = [];
+
+        // ============================================================
+        // SINKRONISASI REAL-TIME DARI FIREBASE 🚀
+        // ============================================================
+        const q = query(collection(db, "transactions"), orderBy("createdAt", "desc"));
+        onSnapshot(q, (snapshot) => {
+            transactions = [];
+            snapshot.forEach((docItem) => {
+                transactions.push({ id: docItem.id, ...docItem.data() });
+            });
+            // Update tampilan setiap ada perubahan di database
+            if (!dashboardPage.classList.contains('hidden')) {
+                refreshDashboard();
             }
+        }, (error) => {
+            console.error("Error mengambil data:", error);
+            transactionList.innerHTML = `<p style="color:red; text-align:center;">Gagal memuat data. Cek koneksi internet.</p>`;
+        });
 
-            // Format input nominal secara real-time (tambahkan titik setiap 3 digit)
-            function formatAmountInput() {
-                let value = amountInput.value.replace(/\D/g, ''); // hapus selain angka
-                if (value === '') {
-                    amountInput.value = '';
-                    return;
-                }
-                let number = parseInt(value, 10);
-                // Format dengan titik pemisah ribuan
-                amountInput.value = number.toLocaleString('id-ID');
+        // ============================================================
+        // HELPER FUNCTIONS
+        // ============================================================
+        function formatRupiah(angka) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency', currency: 'IDR', minimumFractionDigits: 2, maximumFractionDigits: 2,
+            }).format(angka);
+        }
+
+        function formatAmountInput() {
+            let value = amountInput.value.replace(/\D/g, '');
+            if (value === '') { amountInput.value = ''; return; }
+            let number = parseInt(value, 10);
+            amountInput.value = number.toLocaleString('id-ID');
+        }
+
+        function getAmountValue() {
+            let raw = amountInput.value.replace(/\./g, '');
+            return parseInt(raw, 10) || 0;
+        }
+
+        function formatDateDisplay(dateStr) {
+            if (!dateStr) return '-';
+            const d = new Date(dateStr + 'T00:00:00');
+            return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+
+        function calculateTotals() {
+            let totalIncome = 0; let totalExpense = 0;
+            transactions.forEach((trx) => {
+                const nominal = Number(trx.amount) || 0;
+                if (trx.type === 'income') totalIncome += nominal;
+                else if (trx.type === 'expense') totalExpense += nominal;
+            });
+            return { totalIncome, totalExpense, balance: totalIncome - totalExpense };
+        }
+
+        function updateSummaryDisplay() {
+            const { totalIncome, totalExpense, balance } = calculateTotals();
+            balanceDisplay.textContent = formatRupiah(balance);
+            incomeDisplay.textContent = formatRupiah(totalIncome);
+            expenseDisplay.textContent = formatRupiah(totalExpense);
+            balanceDisplay.style.color = balance < 0 ? '#ef4444' : '';
+        }
+
+        function escapeHTML(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function renderTransactionList() {
+            transactionList.innerHTML = '';
+            if (transactions.length === 0) {
+                transactionList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">📭</div>
+                        <p>Belum ada transaksi tercatat.</p>
+                        <p style="font-size:0.8rem;color:#94a3b8;">Mulai dengan menambahkan transaksi di atas.</p>
+                    </div>`;
+                return;
             }
-
-            // Ambil nilai numerik dari input nominal yang sudah diformat
-            function getAmountValue() {
-                let raw = amountInput.value.replace(/\./g, ''); // hapus titik
-                return parseInt(raw, 10) || 0;
-            }
-
-            // Format tanggal tampilan (contoh: 27 Juli 2026)
-            function formatDateDisplay(dateStr) {
-                if (!dateStr) return '-';
-                // dateStr format: YYYY-MM-DD, hindari masalah zona dengan menambah T00:00:00
-                const d = new Date(dateStr + 'T00:00:00');
-                return d.toLocaleDateString('id-ID', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
+            // Tidak perlu reverse lagi karena query firebase sudah desc
+            transactions.forEach((trx) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'transaction-item';
+                const amountClass = trx.type === 'income' ? 'income' : 'expense';
+                const prefix = trx.type === 'income' ? '+' : '-';
+                itemDiv.innerHTML = `
+                    <div class="transaction-info">
+                        <div class="desc">${escapeHTML(trx.description)}</div>
+                        <div class="date">${formatDateDisplay(trx.date)}</div>
+                    </div>
+                    <div class="transaction-amount ${amountClass}">
+                        ${prefix} ${formatRupiah(trx.amount)}
+                    </div>
+                    <button class="btn-delete" data-id="${trx.id}" title="Hapus transaksi">🗑️</button>`;
+                
+                itemDiv.querySelector('.btn-delete').addEventListener('click', function() {
+                    deleteTransaction(this.getAttribute('data-id'));
                 });
-            }
+                transactionList.appendChild(itemDiv);
+            });
+        }
 
-            function saveTransactionsToStorage() {
-                localStorage.setItem(STORAGE_KEY_TRANSACTIONS, JSON.stringify(transactions));
-            }
+        function refreshDashboard() {
+            updateSummaryDisplay();
+            renderTransactionList();
+        }
 
-            function loadTransactionsFromStorage() {
-                const stored = localStorage.getItem(STORAGE_KEY_TRANSACTIONS);
-                if (stored) {
-                    try {
-                        transactions = JSON.parse(stored);
-                        if (!Array.isArray(transactions)) transactions = [];
-                    } catch (e) {
-                        transactions = [];
-                    }
-                } else {
-                    transactions = [];
-                }
-            }
+        // ============================================================
+        // FIREBASE CRUD: TAMBAH & HAPUS
+        // ============================================================
+        async function addTransaction() {
+            const description = descInput.value.trim();
+            const dateValue = dateInput.value; 
+            const amount = getAmountValue();
+            const type = typeSelect.value;
 
-            function calculateTotals() {
-                let totalIncome = 0;
-                let totalExpense = 0;
-                transactions.forEach((trx) => {
-                    const nominal = Number(trx.amount) || 0;
-                    if (trx.type === 'income') totalIncome += nominal;
-                    else if (trx.type === 'expense') totalExpense += nominal;
+            if (!description) { alert('⚠️ Keterangan tidak boleh kosong.'); descInput.focus(); return; }
+            if (!dateValue) { alert('⚠️ Harap pilih tanggal transaksi.'); dateInput.focus(); return; }
+            if (isNaN(amount) || amount <= 0) { alert('⚠️ Nominal harus berupa angka positif.'); amountInput.focus(); return; }
+
+            const originalBtnText = addTransactionBtn.innerHTML;
+            addTransactionBtn.innerHTML = '⏳ Menyimpan...';
+            addTransactionBtn.disabled = true;
+
+            try {
+                // Simpan ke Firebase!
+                await addDoc(collection(db, "transactions"), {
+                    description: description,
+                    amount: amount,
+                    type: type,
+                    date: dateValue,
+                    createdAt: Date.now()
                 });
-                return { totalIncome, totalExpense, balance: totalIncome - totalExpense };
-            }
-
-            function updateSummaryDisplay() {
-                const { totalIncome, totalExpense, balance } = calculateTotals();
-                balanceDisplay.textContent = formatRupiah(balance);
-                incomeDisplay.textContent = formatRupiah(totalIncome);
-                expenseDisplay.textContent = formatRupiah(totalExpense);
-                balanceDisplay.style.color = balance < 0 ? '#ef4444' : '';
-            }
-
-            function escapeHTML(str) {
-                const div = document.createElement('div');
-                div.textContent = str;
-                return div.innerHTML;
-            }
-
-            function renderTransactionList() {
-                transactionList.innerHTML = '';
-                if (transactions.length === 0) {
-                    transactionList.innerHTML = `
-                        <div class="empty-state">
-                            <div class="icon">📭</div>
-                            <p>Belum ada transaksi tercatat.</p>
-                            <p style="font-size:0.8rem;color:#94a3b8;">Mulai dengan menambahkan transaksi di atas.</p>
-                        </div>`;
-                    return;
-                }
-                const reversed = [...transactions].reverse();
-                reversed.forEach((trx) => {
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = 'transaction-item';
-                    const amountClass = trx.type === 'income' ? 'income' : 'expense';
-                    const prefix = trx.type === 'income' ? '+' : '-';
-                    const formattedDate = formatDateDisplay(trx.date);
-                    itemDiv.innerHTML = `
-                        <div class="transaction-info">
-                            <div class="desc">${escapeHTML(trx.description)}</div>
-                            <div class="date">${formattedDate}</div>
-                        </div>
-                        <div class="transaction-amount ${amountClass}">
-                            ${prefix} ${formatRupiah(trx.amount)}
-                        </div>
-                        <button class="btn-delete" data-id="${trx.id}" title="Hapus transaksi">🗑️</button>`;
-                    itemDiv.querySelector('.btn-delete').addEventListener('click', function() {
-                        deleteTransaction(this.getAttribute('data-id'));
-                    });
-                    transactionList.appendChild(itemDiv);
-                });
-            }
-
-            function refreshDashboard() {
-                updateSummaryDisplay();
-                renderTransactionList();
-            }
-
-            function addTransaction() {
-                const description = descInput.value.trim();
-                const dateValue = dateInput.value; // YYYY-MM-DD
-                const amount = getAmountValue(); // ambil nominal bersih
-                const type = typeSelect.value;
-
-                if (!description) { 
-                    alert('⚠️ Keterangan tidak boleh kosong.'); 
-                    descInput.focus(); 
-                    return; 
-                }
-                if (!dateValue) {
-                    alert('⚠️ Harap pilih tanggal transaksi.');
-                    dateInput.focus();
-                    return;
-                }
-                if (isNaN(amount) || amount <= 0) {
-                    alert('⚠️ Nominal harus berupa angka positif.');
-                    amountInput.focus();
-                    return;
-                }
-
-                const newTransaction = {
-                    id: Date.now().toString(36) + Math.random().toString(36).substring(2, 7),
-                    description,
-                    amount,
-                    type,
-                    date: dateValue, // simpan format YYYY-MM-DD
-                };
-
-                transactions.push(newTransaction);
-                saveTransactionsToStorage();
 
                 // Reset form
                 descInput.value = '';
-                dateInput.valueAsDate = new Date(); // set ke hari ini
+                dateInput.valueAsDate = new Date();
                 amountInput.value = '';
                 typeSelect.value = 'income';
                 descInput.focus();
-
-                refreshDashboard();
+            } catch (error) {
+                alert('Gagal menyimpan data ke database: ' + error.message);
+                console.error(error);
+            } finally {
+                addTransactionBtn.innerHTML = originalBtnText;
+                addTransactionBtn.disabled = false;
             }
+        }
 
-            function deleteTransaction(id) {
-                if (!confirm('Yakin ingin menghapus transaksi ini?')) return;
-                transactions = transactions.filter(trx => trx.id !== id);
-                saveTransactionsToStorage();
-                refreshDashboard();
+        async function deleteTransaction(id) {
+            if (!confirm('Yakin ingin menghapus transaksi ini?')) return;
+            try {
+                // Hapus dari Firebase!
+                await deleteDoc(doc(db, "transactions", id));
+            } catch (error) {
+                alert('Gagal menghapus data: ' + error.message);
             }
+        }
 
-            // ============================================================
-            // MANAJEMEN PASSWORD (custom, disimpan di localStorage)
-            // ============================================================
-            function getCurrentPassword() {
-                return localStorage.getItem(STORAGE_KEY_PASSWORD) || DEFAULT_PASSWORD;
-            }
+        // ============================================================
+        // MANAJEMEN PASSWORD & LOGIN (Tetap di Local Storage agar gampang)
+        // ============================================================
+        function getCurrentPassword() {
+            return localStorage.getItem(STORAGE_KEY_PASSWORD) || DEFAULT_PASSWORD;
+        }
 
-            function savePassword(newPassword) {
-                localStorage.setItem(STORAGE_KEY_PASSWORD, newPassword);
-            }
+        function savePassword(newPassword) {
+            localStorage.setItem(STORAGE_KEY_PASSWORD, newPassword);
+        }
 
-            // ============================================================
-            // LOGIN / LOGOUT / SESSION
-            // ============================================================
-            function showDashboard() {
-                loginPage.classList.add('hidden');
-                dashboardPage.classList.remove('hidden');
-                localStorage.setItem(STORAGE_KEY_SESSION, 'true');
-                // Set default tanggal hari ini saat dashboard muncul
-                dateInput.valueAsDate = new Date();
-                refreshDashboard();
-            }
+        function showDashboard() {
+            loginPage.classList.add('hidden');
+            dashboardPage.classList.remove('hidden');
+            localStorage.setItem(STORAGE_KEY_SESSION, 'true');
+            dateInput.valueAsDate = new Date();
+            refreshDashboard();
+        }
 
-            function showLogin() {
-                dashboardPage.classList.add('hidden');
-                loginPage.classList.remove('hidden');
-                localStorage.removeItem(STORAGE_KEY_SESSION);
-                passwordInput.value = '';
+        function showLogin() {
+            dashboardPage.classList.add('hidden');
+            loginPage.classList.remove('hidden');
+            localStorage.removeItem(STORAGE_KEY_SESSION);
+            passwordInput.value = '';
+            loginError.textContent = '';
+            passwordInput.focus();
+        }
+
+        function handleLogin() {
+            const entered = passwordInput.value;
+            if (entered === getCurrentPassword()) {
                 loginError.textContent = '';
+                loginBtn.textContent = '✅ Berhasil...';
+                loginBtn.disabled = true;
+                setTimeout(() => {
+                    showDashboard();
+                    loginBtn.textContent = '🔓 Masuk ke Dashboard';
+                    loginBtn.disabled = false;
+                }, 400);
+            } else {
+                loginError.textContent = '❌ Password salah. Silakan coba lagi.';
+                passwordInput.style.animation = 'shake 0.4s ease';
                 passwordInput.focus();
+                passwordInput.select();
+                setTimeout(() => { passwordInput.style.animation = ''; }, 400);
             }
+        }
 
-            function handleLogin() {
-                const entered = passwordInput.value;
-                if (entered === getCurrentPassword()) {
-                    loginError.textContent = '';
-                    loginBtn.textContent = '✅ Berhasil...';
-                    loginBtn.disabled = true;
-                    setTimeout(() => {
-                        showDashboard();
-                        loginBtn.textContent = '🔓 Masuk ke Dashboard';
-                        loginBtn.disabled = false;
-                    }, 400);
-                } else {
-                    loginError.textContent = '❌ Password salah. Silakan coba lagi.';
-                    passwordInput.style.animation = 'shake 0.4s ease';
-                    passwordInput.focus();
-                    passwordInput.select();
-                    setTimeout(() => { passwordInput.style.animation = ''; }, 400);
-                }
-            }
+        function handleLogout() {
+            if (confirm('Apakah Anda yakin ingin logout?')) showLogin();
+        }
 
-            function handleLogout() {
-                if (confirm('Apakah Anda yakin ingin logout?')) {
-                    showLogin();
-                }
-            }
-
-            // ============================================================
-            // TOGGLE PASSWORD VISIBILITY (untuk semua ikon mata)
-            // ============================================================
-            function setupTogglePasswordButtons() {
-                document.querySelectorAll('.toggle-password').forEach(btn => {
-                    btn.removeEventListener('click', toggleHandler);
-                    btn.addEventListener('click', toggleHandler);
-                });
-            }
-
-            function toggleHandler(e) {
-                const btn = e.currentTarget;
-                const input = btn.previousElementSibling;
+        // Toggle password visibility
+        document.querySelectorAll('.toggle-password').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const input = e.currentTarget.previousElementSibling;
                 if (input && input.tagName === 'INPUT') {
                     const isPassword = input.getAttribute('type') === 'password';
                     input.setAttribute('type', isPassword ? 'text' : 'password');
-                    btn.textContent = isPassword ? '🙈' : '👁️';
+                    e.currentTarget.textContent = isPassword ? '🙈' : '👁️';
                 }
+            });
+        });
+
+        // MODAL PASSWORD
+        function openPasswordModal() {
+            oldPasswordInput.value = ''; newPasswordInput.value = ''; confirmPasswordInput.value = '';
+            modalError.textContent = ''; modalSuccess.textContent = '';
+            [oldPasswordInput, newPasswordInput, confirmPasswordInput].forEach(input => input.setAttribute('type', 'password'));
+            document.querySelectorAll('#passwordModal .toggle-password').forEach(btn => btn.textContent = '👁️');
+            passwordModal.classList.remove('hidden');
+            oldPasswordInput.focus();
+        }
+
+        function closePasswordModal() { passwordModal.classList.add('hidden'); }
+
+        function handleSavePassword() {
+            modalError.textContent = ''; modalSuccess.textContent = '';
+            const oldPass = oldPasswordInput.value;
+            const newPass = newPasswordInput.value.trim();
+            const confirmPass = confirmPasswordInput.value.trim();
+
+            if (oldPass !== getCurrentPassword()) { modalError.textContent = '❌ Password lama salah.'; oldPasswordInput.focus(); return; }
+            if (!newPass || newPass.length < 3) { modalError.textContent = '❌ Password baru minimal 3 karakter.'; newPasswordInput.focus(); return; }
+            if (newPass !== confirmPass) { modalError.textContent = '❌ Konfirmasi password tidak cocok.'; confirmPasswordInput.focus(); return; }
+
+            savePassword(newPass);
+            modalSuccess.textContent = '✅ Password berhasil diubah!';
+            oldPasswordInput.value = ''; newPasswordInput.value = ''; confirmPasswordInput.value = '';
+            setTimeout(() => { closePasswordModal(); modalSuccess.textContent = ''; }, 1500);
+        }
+
+        // ============================================================
+        // EVENT LISTENERS UMUM
+        // ============================================================
+        loginBtn.addEventListener('click', handleLogin);
+        passwordInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); handleLogin(); } });
+        logoutBtn.addEventListener('click', handleLogout);
+
+        amountInput.addEventListener('input', formatAmountInput);
+        amountInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addTransaction(); } });
+        addTransactionBtn.addEventListener('click', addTransaction);
+        descInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (descInput.value.trim() && getAmountValue() <= 0) amountInput.focus();
+                else addTransaction();
             }
+        });
+        dateInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addTransaction(); } });
 
-            // ============================================================
-            // MODAL GANTI PASSWORD (FITUR TERSEMBUNYI)
-            // ============================================================
-            function openPasswordModal() {
-                oldPasswordInput.value = '';
-                newPasswordInput.value = '';
-                confirmPasswordInput.value = '';
-                modalError.textContent = '';
-                modalSuccess.textContent = '';
+        brandLogo.addEventListener('click', openPasswordModal);
+        savePasswordBtn.addEventListener('click', handleSavePassword);
+        closeModalBtn.addEventListener('click', closePasswordModal);
+        passwordModal.addEventListener('click', (e) => { if (e.target === passwordModal) closePasswordModal(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !passwordModal.classList.contains('hidden')) closePasswordModal(); });
 
-                [oldPasswordInput, newPasswordInput, confirmPasswordInput].forEach(input => {
-                    input.setAttribute('type', 'password');
-                });
-                document.querySelectorAll('#passwordModal .toggle-password').forEach(btn => {
-                    btn.textContent = '👁️';
-                });
+        // INIT
+        const isLoggedIn = localStorage.getItem(STORAGE_KEY_SESSION) === 'true';
+        if (isLoggedIn) showDashboard();
+        else { showLogin(); passwordInput.focus(); }
 
-                passwordModal.classList.remove('hidden');
-                oldPasswordInput.focus();
-            }
-
-            function closePasswordModal() {
-                passwordModal.classList.add('hidden');
-            }
-
-            function handleSavePassword() {
-                modalError.textContent = '';
-                modalSuccess.textContent = '';
-                const oldPass = oldPasswordInput.value;
-                const newPass = newPasswordInput.value.trim();
-                const confirmPass = confirmPasswordInput.value.trim();
-
-                if (oldPass !== getCurrentPassword()) {
-                    modalError.textContent = '❌ Password lama salah.';
-                    oldPasswordInput.focus();
-                    return;
-                }
-                if (!newPass || newPass.length < 3) {
-                    modalError.textContent = '❌ Password baru minimal 3 karakter.';
-                    newPasswordInput.focus();
-                    return;
-                }
-                if (newPass !== confirmPass) {
-                    modalError.textContent = '❌ Konfirmasi password tidak cocok.';
-                    confirmPasswordInput.focus();
-                    return;
-                }
-
-                savePassword(newPass);
-                modalSuccess.textContent = '✅ Password berhasil diubah!';
-                oldPasswordInput.value = '';
-                newPasswordInput.value = '';
-                confirmPasswordInput.value = '';
-                setTimeout(() => {
-                    closePasswordModal();
-                    modalSuccess.textContent = '';
-                }, 1500);
-            }
-
-            // ============================================================
-            // EVENT LISTENERS
-            // ============================================================
-            loginBtn.addEventListener('click', handleLogin);
-            passwordInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') { e.preventDefault(); handleLogin(); }
-            });
-            logoutBtn.addEventListener('click', handleLogout);
-
-            // Format nominal saat mengetik
-            amountInput.addEventListener('input', formatAmountInput);
-            // Jaga agar kursor tidak lompat saat format
-            amountInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    addTransaction();
-                }
-            });
-
-            addTransactionBtn.addEventListener('click', addTransaction);
-            descInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    if (descInput.value.trim() && getAmountValue() <= 0) {
-                        amountInput.focus();
-                    } else {
-                        addTransaction();
-                    }
-                }
-            });
-            dateInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    addTransaction();
-                }
-            });
-
-            // Toggle password universal
-            setupTogglePasswordButtons();
-
-            // ---- Fitur tersembunyi: klik logo dashboard ----
-            brandLogo.addEventListener('click', openPasswordModal);
-
-            // Modal events
-            savePasswordBtn.addEventListener('click', handleSavePassword);
-            closeModalBtn.addEventListener('click', closePasswordModal);
-            passwordModal.addEventListener('click', function(e) {
-                if (e.target === passwordModal) closePasswordModal();
-            });
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && !passwordModal.classList.contains('hidden')) {
-                    closePasswordModal();
-                }
-            });
-
-            // ============================================================
-            // INISIALISASI APLIKASI
-            // ============================================================
-            loadTransactionsFromStorage();
-            const isLoggedIn = localStorage.getItem(STORAGE_KEY_SESSION) === 'true';
-            if (isLoggedIn) {
-                showDashboard();
-            } else {
-                showLogin();
-                passwordInput.focus();
-            }
-        })();
     </script>
 </body>
 </html>
