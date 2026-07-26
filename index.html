@@ -6,7 +6,7 @@
     <title>Manajemen Kas Keuangan</title>
     <style>
         /* ============================================================
-           CSS RESET & BASE
+           CSS RESET & BASE (sama seperti sebelumnya, tanpa perubahan)
            ============================================================ */
         *,
         *::before,
@@ -55,9 +55,7 @@
             position: relative;
         }
 
-        /* ============================================================
-           LOGIN PAGE
-           ============================================================ */
+        /* LOGIN PAGE */
         .login-page {
             display: flex;
             flex-direction: column;
@@ -219,9 +217,7 @@
             font-weight: 500;
         }
 
-        /* ============================================================
-           DASHBOARD PAGE
-           ============================================================ */
+        /* DASHBOARD PAGE */
         .dashboard-page {
             display: flex;
             flex-direction: column;
@@ -420,9 +416,7 @@
         .empty-state .icon { font-size: 2.5rem; margin-bottom: 8px; opacity: 0.6; }
         .empty-state p { font-size: 0.85rem; }
 
-        /* ============================================================
-           MODAL GANTI PASSWORD
-           ============================================================ */
+        /* MODAL GANTI PASSWORD */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -527,7 +521,7 @@
         <!-- HALAMAN DASHBOARD -->
         <div class="dashboard-page hidden" id="dashboardPage">
             <div class="dashboard-header">
-                <div class="brand" id="brandLogo" title="Klik untuk pengaturan rahasia">
+                <div class="brand" id="brandLogo" title="Klik untuk ganti password (hanya admin)">
                     <div class="logo">💰</div>
                     <h2>Kas Karang Taruna Ponokawan Rt.08</h2>
                 </div>
@@ -549,8 +543,8 @@
                 </div>
             </div>
 
-            <!-- Form Tambah Transaksi -->
-            <div class="form-card">
+            <!-- Form Tambah Transaksi: hanya muncul untuk admin -->
+            <div class="form-card" id="formCard" style="display: none;">
                 <h3>✍️ Catat Transaksi Baru</h3>
                 <div class="form-row">
                     <input type="text" id="descInput" placeholder="Keterangan..." maxlength="60" style="flex:2;">
@@ -577,11 +571,11 @@
             </div>
         </div>
 
-        <!-- MODAL GANTI PASSWORD -->
+        <!-- MODAL GANTI PASSWORD (hanya bisa diakses admin) -->
         <div class="modal-overlay hidden" id="passwordModal">
             <div class="modal-card">
-                <h3>🔒 Ganti Password</h3>
-                <p class="modal-subtitle">Fitur rahasia – ubah kata sandi login</p>
+                <h3>🔒 Ganti Password Admin</h3>
+                <p class="modal-subtitle">Hanya admin yang bisa mengubah password</p>
                 <div class="input-group">
                     <input type="password" id="oldPasswordInput" placeholder="Password lama" autocomplete="off">
                     <button class="toggle-password" type="button">👁️</button>
@@ -603,13 +597,11 @@
 
     </div>
 
-    <!-- SCRIPT FIREBASE & LOGIKANYA DIUBAH MENJADI TYPE MODULE -->
+    <!-- SCRIPT FIREBASE & LOGIKA -->
     <script type="module">
-        // 1. Import Firebase SDK versi terbaru
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // 2. Konfigurasi Firebase dari akunmu
         const firebaseConfig = {
             apiKey: "AIzaSyCuMU7sMromx3L_O51ARd2w9_8UWrbyyLg",
             authDomain: "kas-karang-taruna-9df5a.firebaseapp.com",
@@ -619,16 +611,34 @@
             appId: "1:269127453142:web:3b9c6a99f3dbb3d49bfc77"
         };
 
-        // 3. Inisialisasi Aplikasi dan Database
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
         // ============================================================
-        // KONSTANTA & STORAGE KEYS (Untuk Login)
+        // KONFIGURASI PASSWORD (default)
         // ============================================================
-        const DEFAULT_PASSWORD = 'PeranKawan';
+        const DEFAULT_ADMIN_PASSWORD = 'AdminKarangTaruna'; // Password untuk admin (2 orang)
+        const DEFAULT_VIEWER_PASSWORD = 'LihatSaja'; // Password untuk warga lain yang hanya bisa melihat
+
+        // Key penyimpanan
         const STORAGE_KEY_SESSION = 'kas_session_logged_in';
-        const STORAGE_KEY_PASSWORD = 'kas_password';
+        const STORAGE_KEY_ROLE = 'kas_user_role'; // 'admin' atau 'viewer'
+        const STORAGE_KEY_ADMIN_PASSWORD = 'kas_admin_password';
+        const STORAGE_KEY_VIEWER_PASSWORD = 'kas_viewer_password';
+
+        // Fungsi ambil password tersimpan, kalau belum ada pakai default
+        function getAdminPassword() {
+            return localStorage.getItem(STORAGE_KEY_ADMIN_PASSWORD) || DEFAULT_ADMIN_PASSWORD;
+        }
+        function getViewerPassword() {
+            return localStorage.getItem(STORAGE_KEY_VIEWER_PASSWORD) || DEFAULT_VIEWER_PASSWORD;
+        }
+        function saveAdminPassword(newPass) {
+            localStorage.setItem(STORAGE_KEY_ADMIN_PASSWORD, newPass);
+        }
+        function saveViewerPassword(newPass) {
+            localStorage.setItem(STORAGE_KEY_VIEWER_PASSWORD, newPass);
+        }
 
         // ============================================================
         // REFERENSI DOM
@@ -649,6 +659,7 @@
         const typeSelect = document.getElementById('typeSelect');
         const addTransactionBtn = document.getElementById('addTransactionBtn');
         const transactionList = document.getElementById('transactionList');
+        const formCard = document.getElementById('formCard');
 
         const brandLogo = document.getElementById('brandLogo');
         const passwordModal = document.getElementById('passwordModal');
@@ -660,18 +671,18 @@
         const savePasswordBtn = document.getElementById('savePasswordBtn');
         const closeModalBtn = document.getElementById('closeModalBtn');
 
-        let transactions = [];
+        let currentRole = null; // 'admin' atau 'viewer', diisi setelah login
 
         // ============================================================
-        // SINKRONISASI REAL-TIME DARI FIREBASE 🚀
+        // SINKRONISASI REAL-TIME DARI FIREBASE
         // ============================================================
+        let transactions = [];
         const q = query(collection(db, "transactions"), orderBy("createdAt", "desc"));
         onSnapshot(q, (snapshot) => {
             transactions = [];
             snapshot.forEach((docItem) => {
                 transactions.push({ id: docItem.id, ...docItem.data() });
             });
-            // Update tampilan setiap ada perubahan di database
             if (!dashboardPage.classList.contains('hidden')) {
                 refreshDashboard();
             }
@@ -742,7 +753,6 @@
                     </div>`;
                 return;
             }
-            // Tidak perlu reverse lagi karena query firebase sudah desc
             transactions.forEach((trx) => {
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'transaction-item';
@@ -756,11 +766,14 @@
                     <div class="transaction-amount ${amountClass}">
                         ${prefix} ${formatRupiah(trx.amount)}
                     </div>
-                    <button class="btn-delete" data-id="${trx.id}" title="Hapus transaksi">🗑️</button>`;
-                
-                itemDiv.querySelector('.btn-delete').addEventListener('click', function() {
-                    deleteTransaction(this.getAttribute('data-id'));
-                });
+                    <!-- Tombol hapus hanya muncul untuk admin -->
+                    ${currentRole === 'admin' ? `<button class="btn-delete" data-id="${trx.id}" title="Hapus transaksi">🗑️</button>` : ''}
+                `;
+                if (currentRole === 'admin') {
+                    itemDiv.querySelector('.btn-delete').addEventListener('click', function() {
+                        deleteTransaction(this.getAttribute('data-id'));
+                    });
+                }
                 transactionList.appendChild(itemDiv);
             });
         }
@@ -771,11 +784,12 @@
         }
 
         // ============================================================
-        // FIREBASE CRUD: TAMBAH & HAPUS
+        // FIREBASE CRUD (hanya dipanggil admin)
         // ============================================================
         async function addTransaction() {
+            if (currentRole !== 'admin') return;
             const description = descInput.value.trim();
-            const dateValue = dateInput.value; 
+            const dateValue = dateInput.value;
             const amount = getAmountValue();
             const type = typeSelect.value;
 
@@ -788,7 +802,6 @@
             addTransactionBtn.disabled = true;
 
             try {
-                // Simpan ke Firebase!
                 await addDoc(collection(db, "transactions"), {
                     description: description,
                     amount: amount,
@@ -796,16 +809,13 @@
                     date: dateValue,
                     createdAt: Date.now()
                 });
-
-                // Reset form
                 descInput.value = '';
                 dateInput.valueAsDate = new Date();
                 amountInput.value = '';
                 typeSelect.value = 'income';
                 descInput.focus();
             } catch (error) {
-                alert('Gagal menyimpan data ke database: ' + error.message);
-                console.error(error);
+                alert('Gagal menyimpan data: ' + error.message);
             } finally {
                 addTransactionBtn.innerHTML = originalBtnText;
                 addTransactionBtn.disabled = false;
@@ -813,30 +823,28 @@
         }
 
         async function deleteTransaction(id) {
+            if (currentRole !== 'admin') return;
             if (!confirm('Yakin ingin menghapus transaksi ini?')) return;
             try {
-                // Hapus dari Firebase!
                 await deleteDoc(doc(db, "transactions", id));
             } catch (error) {
-                alert('Gagal menghapus data: ' + error.message);
+                alert('Gagal menghapus: ' + error.message);
             }
         }
 
         // ============================================================
-        // MANAJEMEN PASSWORD & LOGIN (Tetap di Local Storage agar gampang)
+        // LOGIN & SESSION
         // ============================================================
-        function getCurrentPassword() {
-            return localStorage.getItem(STORAGE_KEY_PASSWORD) || DEFAULT_PASSWORD;
-        }
-
-        function savePassword(newPassword) {
-            localStorage.setItem(STORAGE_KEY_PASSWORD, newPassword);
-        }
-
-        function showDashboard() {
+        function showDashboard(role) {
+            currentRole = role;
             loginPage.classList.add('hidden');
             dashboardPage.classList.remove('hidden');
             localStorage.setItem(STORAGE_KEY_SESSION, 'true');
+            localStorage.setItem(STORAGE_KEY_ROLE, role);
+
+            // Tampilkan form hanya jika admin
+            formCard.style.display = (role === 'admin') ? 'block' : 'none';
+
             dateInput.valueAsDate = new Date();
             refreshDashboard();
         }
@@ -845,19 +853,30 @@
             dashboardPage.classList.add('hidden');
             loginPage.classList.remove('hidden');
             localStorage.removeItem(STORAGE_KEY_SESSION);
+            localStorage.removeItem(STORAGE_KEY_ROLE);
             passwordInput.value = '';
             loginError.textContent = '';
             passwordInput.focus();
+            currentRole = null;
         }
 
         function handleLogin() {
             const entered = passwordInput.value;
-            if (entered === getCurrentPassword()) {
+            if (entered === getAdminPassword()) {
                 loginError.textContent = '';
-                loginBtn.textContent = '✅ Berhasil...';
+                loginBtn.textContent = '✅ Admin...';
                 loginBtn.disabled = true;
                 setTimeout(() => {
-                    showDashboard();
+                    showDashboard('admin');
+                    loginBtn.textContent = '🔓 Masuk ke Dashboard';
+                    loginBtn.disabled = false;
+                }, 400);
+            } else if (entered === getViewerPassword()) {
+                loginError.textContent = '';
+                loginBtn.textContent = '✅ Viewer...';
+                loginBtn.disabled = true;
+                setTimeout(() => {
+                    showDashboard('viewer');
                     loginBtn.textContent = '🔓 Masuk ke Dashboard';
                     loginBtn.disabled = false;
                 }, 400);
@@ -874,7 +893,9 @@
             if (confirm('Apakah Anda yakin ingin logout?')) showLogin();
         }
 
-        // Toggle password visibility
+        // ============================================================
+        // TOGGLE PASSWORD VISIBILITY
+        // ============================================================
         document.querySelectorAll('.toggle-password').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const input = e.currentTarget.previousElementSibling;
@@ -886,8 +907,14 @@
             });
         });
 
-        // MODAL PASSWORD
+        // ============================================================
+        // MODAL GANTI PASSWORD (hanya admin yang bisa akses)
+        // ============================================================
         function openPasswordModal() {
+            if (currentRole !== 'admin') {
+                alert('Hanya admin yang dapat mengganti password.');
+                return;
+            }
             oldPasswordInput.value = ''; newPasswordInput.value = ''; confirmPasswordInput.value = '';
             modalError.textContent = ''; modalSuccess.textContent = '';
             [oldPasswordInput, newPasswordInput, confirmPasswordInput].forEach(input => input.setAttribute('type', 'password'));
@@ -899,39 +926,53 @@
         function closePasswordModal() { passwordModal.classList.add('hidden'); }
 
         function handleSavePassword() {
+            if (currentRole !== 'admin') return;
             modalError.textContent = ''; modalSuccess.textContent = '';
             const oldPass = oldPasswordInput.value;
             const newPass = newPasswordInput.value.trim();
             const confirmPass = confirmPasswordInput.value.trim();
 
-            if (oldPass !== getCurrentPassword()) { modalError.textContent = '❌ Password lama salah.'; oldPasswordInput.focus(); return; }
-            if (!newPass || newPass.length < 3) { modalError.textContent = '❌ Password baru minimal 3 karakter.'; newPasswordInput.focus(); return; }
-            if (newPass !== confirmPass) { modalError.textContent = '❌ Konfirmasi password tidak cocok.'; confirmPasswordInput.focus(); return; }
+            // Cek password lama admin
+            if (oldPass !== getAdminPassword()) {
+                modalError.textContent = '❌ Password lama salah.';
+                oldPasswordInput.focus();
+                return;
+            }
+            if (!newPass || newPass.length < 3) {
+                modalError.textContent = '❌ Password baru minimal 3 karakter.';
+                newPasswordInput.focus();
+                return;
+            }
+            if (newPass !== confirmPass) {
+                modalError.textContent = '❌ Konfirmasi password tidak cocok.';
+                confirmPasswordInput.focus();
+                return;
+            }
 
-            savePassword(newPass);
-            modalSuccess.textContent = '✅ Password berhasil diubah!';
+            saveAdminPassword(newPass);
+            modalSuccess.textContent = '✅ Password admin berhasil diubah!';
             oldPasswordInput.value = ''; newPasswordInput.value = ''; confirmPasswordInput.value = '';
             setTimeout(() => { closePasswordModal(); modalSuccess.textContent = ''; }, 1500);
         }
 
         // ============================================================
-        // EVENT LISTENERS UMUM
+        // EVENT LISTENERS
         // ============================================================
         loginBtn.addEventListener('click', handleLogin);
         passwordInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); handleLogin(); } });
         logoutBtn.addEventListener('click', handleLogout);
 
-        amountInput.addEventListener('input', formatAmountInput);
-        amountInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addTransaction(); } });
-        addTransactionBtn.addEventListener('click', addTransaction);
-        descInput.addEventListener('keydown', (e) => {
+        amountInput?.addEventListener('input', formatAmountInput);
+        amountInput?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addTransaction(); } });
+        addTransactionBtn?.addEventListener('click', addTransaction);
+        descInput?.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 if (descInput.value.trim() && getAmountValue() <= 0) amountInput.focus();
                 else addTransaction();
             }
         });
-        dateInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addTransaction(); } });
+        dateInput?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addTransaction(); } });
 
         brandLogo.addEventListener('click', openPasswordModal);
         savePasswordBtn.addEventListener('click', handleSavePassword);
@@ -939,11 +980,17 @@
         passwordModal.addEventListener('click', (e) => { if (e.target === passwordModal) closePasswordModal(); });
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !passwordModal.classList.contains('hidden')) closePasswordModal(); });
 
-        // INIT
+        // ============================================================
+        // INISIALISASI: cek session sebelumnya
+        // ============================================================
         const isLoggedIn = localStorage.getItem(STORAGE_KEY_SESSION) === 'true';
-        if (isLoggedIn) showDashboard();
-        else { showLogin(); passwordInput.focus(); }
-
+        const savedRole = localStorage.getItem(STORAGE_KEY_ROLE);
+        if (isLoggedIn && (savedRole === 'admin' || savedRole === 'viewer')) {
+            showDashboard(savedRole);
+        } else {
+            showLogin();
+            passwordInput.focus();
+        }
     </script>
 </body>
 </html>
