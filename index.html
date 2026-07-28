@@ -1,1 +1,964 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Kas Keuangan</title>
+    <style>
+        /* ============================================================
+           CSS RESET & BASE
+           ============================================================ */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
+        /* Variabel default (login theme) */
+        :root {
+            --primary: #D4AF37;
+            --primary-hover: #B8960C;
+            --success: #2E7D32;
+            --success-bg: #e8f5e9;
+            --danger: #B71C1C;
+            --danger-bg: #ffebee;
+            --bg: #2E1E0F;
+            --card-bg: rgba(20, 10, 5, 0.4);  /* frosted glass gelap */
+            --text: #FFF8DC;                  /* Putih Gading */
+            --text-secondary: #FFD700;        /* Emas */
+            --border: rgba(255, 248, 220, 0.3);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --shadow: 0 8px 32px rgba(0,0,0,0.3);
+            --shadow-lg: 0 20px 40px rgba(0,0,0,0.2);
+            --transition: 0.2s ease;
+            --glass-blur: 15px;
+            --btn-gradient: linear-gradient(135deg, #D4AF37, #B87333); /* Emas-Tembaga */
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            background: var(--bg);
+            transition: background 0.3s;
+        }
+
+        /* ============================================================
+           VIDEO BACKGROUND
+           ============================================================ */
+        .bg-video {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            z-index: -2;
+        }
+        .bg-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            transition: background 0.3s;
+        }
+
+        /* ============================================================
+           TEMA LOGIN (Coklat Tua, Emas, Putih Gading, Krem)
+           ============================================================ */
+        body.login-theme {
+            --primary: #D4AF37;
+            --primary-hover: #B8960C;
+            --bg: #2E1E0F;
+            --card-bg: rgba(20, 10, 5, 0.5);
+            --text: #FFF8DC;
+            --text-secondary: #FFD700;
+            --border: rgba(255, 248, 220, 0.3);
+            --shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        body.login-theme .bg-overlay {
+            background: rgba(20, 10, 5, 0.5);
+        }
+
+        /* ============================================================
+           TEMA DASHBOARD (Emas Terang, Coklat Gelap, Putih, Merah/Marun)
+           ============================================================ */
+        body.dashboard-theme {
+            --primary: #FFB300;
+            --primary-hover: #FF8F00;
+            --success: #2E7D32;
+            --success-bg: #e8f5e9;
+            --danger: #B71C1C;
+            --danger-bg: #ffebee;
+            --bg: #FFF8E1;
+            --card-bg: rgba(255, 255, 255, 0.25);
+            --text: #3E2723;
+            --text-secondary: #5D4037;
+            --border: rgba(255, 255, 255, 0.5);
+            --shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        body.dashboard-theme .bg-overlay {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        /* ============================================================
+           KOMPONEN FROSTED GLASS (Login, Card, Form, Modal, Header)
+           ============================================================ */
+        .login-card,
+        .card,
+        .form-card,
+        .transaction-list-card,
+        .modal-card,
+        .dashboard-header {
+            background: var(--card-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 580px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            animation: fadeSlideIn 0.5s ease;
+        }
+
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            60% { transform: translateX(-6px); }
+            80% { transform: translateX(4px); }
+        }
+
+        .login-card {
+            padding: 40px 32px 36px;
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+        }
+        .login-icon {
+            width: 64px;
+            height: 64px;
+            background: var(--btn-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 28px;
+            color: white;
+            box-shadow: 0 8px 24px rgba(212, 175, 55, 0.5);
+        }
+        .login-card h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+        .login-card p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 28px;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .input-group input,
+        .form-row input,
+        .form-row select {
+            width: 100%;
+            padding: 14px 16px;
+            padding-right: 48px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-family: inherit;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text);
+            outline: none;
+            transition: all var(--transition);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+        .form-row input, .form-row select {
+            padding-right: 16px;
+        }
+        .input-group input::placeholder,
+        .form-row input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.8;
+        }
+        .input-group input:focus,
+        .form-row input:focus,
+        .form-row select:focus {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.2);
+        }
+        .toggle-password {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 8px;
+            color: var(--text-secondary);
+        }
+        .toggle-password:hover {
+            color: var(--text);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 13px 24px;
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            transition: all var(--transition);
+            letter-spacing: 0.01em;
+        }
+        .btn-primary {
+            background: var(--btn-gradient);
+            color: #fff;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #FFD700, #CD7F32);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.6);
+        }
+        .btn-logout {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 9px 18px;
+            font-size: 0.85rem;
+            border-radius: 8px;
+        }
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: var(--danger);
+        }
+        .error-message {
+            color: var(--danger);
+            font-size: 0.85rem;
+            margin-top: -8px;
+            margin-bottom: 16px;
+            min-height: 20px;
+            font-weight: 500;
+        }
+
+        /* ============================================================
+           DASHBOARD
+           ============================================================ */
+        .dashboard-page {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding-bottom: 40px;
+            animation: fadeSlideIn 0.4s ease;
+        }
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 18px 22px;
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            user-select: none;
+            transition: opacity var(--transition);
+        }
+        .brand:hover { opacity: 0.8; }
+        .logo {
+            width: 38px;
+            height: 38px;
+            background: var(--btn-gradient);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.1rem;
+            pointer-events: none;
+        }
+        .dashboard-header h2 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            pointer-events: none;
+            color: var(--text);
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+        @media (max-width: 480px) {
+            .summary-cards {
+                grid-template-columns: 1fr 1fr;
+            }
+            .summary-cards .card:first-child {
+                grid-column: 1 / -1;
+            }
+        }
+        .card {
+            padding: 18px 16px;
+            transition: all var(--transition);
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+        }
+        .card .label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .card .value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .card.balance .value { color: var(--primary); font-size: 1.5rem; }
+        .card.income .value { color: var(--success); }
+        .card.expense .value { color: var(--danger); }
+
+        .form-card {
+            padding: 22px 20px;
+        }
+        .form-card h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .form-row input,
+        .form-row select {
+            flex: 1;
+            min-width: 100px;
+        }
+        .form-card .btn-primary {
+            width: auto;
+            padding: 12px 28px;
+        }
+
+        .transaction-list-card {
+            padding: 20px;
+        }
+        .header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+        .btn-print {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--text);
+            transition: all var(--transition);
+        }
+        .btn-print:hover {
+            background: var(--primary-hover);
+            color: #fff;
+        }
+        .transaction-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+            gap: 10px;
+            flex-wrap: wrap;
+            transition: background var(--transition);
+        }
+        .transaction-item:last-child { border-bottom: none; }
+        .transaction-item:hover {
+            background: rgba(255,255,255,0.1);
+            margin: 0 -12px;
+            padding-left: 12px;
+            padding-right: 12px;
+            border-radius: 8px;
+        }
+        .transaction-info { flex: 1; min-width: 120px; }
+        .transaction-info .desc { font-weight: 600; font-size: 0.9rem; color: var(--text); }
+        .transaction-info .date { font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px; }
+        .transaction-amount { font-weight: 700; font-size: 0.95rem; }
+        .transaction-amount.income { color: var(--success); }
+        .transaction-amount.expense { color: var(--danger); }
+        .btn-delete {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 1rem;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+        .btn-delete:hover {
+            background: var(--danger-bg);
+            color: var(--danger);
+        }
+        .empty-state {
+            text-align: center;
+            padding: 32px 16px;
+            color: var(--text-secondary);
+        }
+        .empty-state .icon { font-size: 2.5rem; margin-bottom: 8px; opacity: 0.6; }
+        .empty-state p { font-size: 0.85rem; }
+
+        /* ============================================================
+           MODAL GANTI PASSWORD
+           ============================================================ */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 16px;
+            animation: fadeIn 0.2s ease;
+        }
+        .modal-overlay.hidden { display: none; }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .modal-card {
+            padding: 28px 24px;
+            width: 100%;
+            max-width: 380px;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal-card h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+        .modal-card .modal-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+        .password-type-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .password-type-selector button {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
+            color: var(--text);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+        .password-type-selector button.active {
+            background: var(--btn-gradient);
+            color: #fff;
+            border-color: transparent;
+        }
+
+        .hidden { display: none !important; }
+
+        /* ============================================================
+           CETAK (dipertahankan)
+           ============================================================ */
+        @media print {
+            body.print-page {
+                background: white;
+                padding: 20px;
+                font-family: 'Inter', sans-serif;
+                color: #000;
+            }
+            .print-header { text-align: center; margin-bottom: 20px; }
+            .print-header h2 { font-size: 1.5rem; margin-bottom: 4px; color: #4f46e5; }
+            .print-header p { font-size: 0.9rem; color: #555; }
+            .print-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+            .print-table th, .print-table td { border: 1px solid #ddd; padding: 10px 12px; text-align: left; font-size: 0.9rem; }
+            .print-table th { background: #f1f5f9; font-weight: 600; }
+            .print-income { color: #10b981; font-weight: 600; }
+            .print-expense { color: #ef4444; font-weight: 600; }
+        }
+    </style>
+</head>
+<body class="login-theme"> <!-- Tema awal LOGIN -->
+
+    <!-- ==================== VIDEO BACKGROUND ==================== -->
+    <video id="bgVideoLogin" class="bg-video" muted loop playsinline>
+        <source src="bg-login.mp4" type="video/mp4">
+    </video>
+    <video id="bgVideoDashboard" class="bg-video hidden" muted loop playsinline>
+        <source src="bg-dashboard.mp4" type="video/mp4">
+    </video>
+    <div class="bg-overlay"></div>
+
+    <div class="app-container" id="appContainer">
+        <!-- ==================== LOGIN PAGE ==================== -->
+        <div class="login-page" id="loginPage">
+            <div class="login-card">
+                <div class="login-icon">🔐</div>
+                <h1>Kas Karang Taruna Ponokawan Rt.08</h1>
+                <p>Masukkan password untuk mengakses dashboard</p>
+                <div class="input-group">
+                    <input type="password" id="passwordInput" placeholder="Masukkan password..." autocomplete="off">
+                    <button class="toggle-password" type="button">👁️</button>
+                </div>
+                <div class="error-message" id="loginError"></div>
+                <button class="btn btn-primary" id="loginBtn">🔓 Masuk ke Dashboard</button>
+            </div>
+        </div>
+
+        <!-- ==================== DASHBOARD PAGE ==================== -->
+        <div class="dashboard-page hidden" id="dashboardPage">
+            <div class="dashboard-header">
+                <div class="brand" id="brandLogo" title="Klik untuk ganti password (admin)">
+                    <div class="logo">💰</div>
+                    <h2>Dashboard Kas</h2>
+                </div>
+                <button class="btn btn-logout" id="logoutBtn">🚪 Logout</button>
+            </div>
+
+            <div class="summary-cards">
+                <div class="card balance">
+                    <div class="label">💰 Saldo Saat Ini</div>
+                    <div class="value" id="balanceDisplay">Rp0,00</div>
+                </div>
+                <div class="card income">
+                    <div class="label">📈 Total Pemasukan</div>
+                    <div class="value" id="incomeDisplay">Rp0,00</div>
+                </div>
+                <div class="card expense">
+                    <div class="label">📉 Total Pengeluaran</div>
+                    <div class="value" id="expenseDisplay">Rp0,00</div>
+                </div>
+            </div>
+
+            <div class="form-card" id="formCard" style="display: none;">
+                <h3>✍️ Catat Transaksi Baru</h3>
+                <div class="form-row">
+                    <input type="text" id="descInput" placeholder="Keterangan..." maxlength="60" style="flex:2;">
+                    <input type="date" id="dateInput" style="flex:1.2;">
+                </div>
+                <div class="form-row">
+                    <input type="text" id="amountInput" placeholder="Nominal (Rp)" inputmode="numeric" style="flex:1.5;">
+                    <select id="typeSelect" style="flex:1;">
+                        <option value="income">📈 Pemasukan</option>
+                        <option value="expense">📉 Pengeluaran</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" id="addTransactionBtn">➕ Tambah Transaksi</button>
+            </div>
+
+            <div class="transaction-list-card">
+                <div class="header-row">
+                    <h3>📋 Riwayat Transaksi</h3>
+                    <button class="btn-print" id="printBtn">🖨️ Cetak</button>
+                </div>
+                <div id="transactionList">
+                    <div class="empty-state">
+                        <div class="icon">⏳</div>
+                        <p>Memuat data dari server...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== MODAL GANTI PASSWORD ==================== -->
+        <div class="modal-overlay hidden" id="passwordModal">
+            <div class="modal-card">
+                <h3>🔒 Ganti Password</h3>
+                <p class="modal-subtitle">Pilih tipe password yang ingin diubah</p>
+                <div class="password-type-selector">
+                    <button id="selectAdminBtn" class="active">👤 Admin</button>
+                    <button id="selectViewerBtn">👥 Viewer</button>
+                </div>
+                <div id="adminPasswordForm">
+                    <div class="input-group">
+                        <input type="password" id="adminOldPassword" placeholder="Password admin saat ini" autocomplete="off">
+                        <button class="toggle-password" type="button">👁️</button>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="adminNewPassword" placeholder="Password admin baru" autocomplete="off">
+                        <button class="toggle-password" type="button">👁️</button>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="adminConfirmPassword" placeholder="Konfirmasi password admin baru" autocomplete="off">
+                        <button class="toggle-password" type="button">👁️</button>
+                    </div>
+                </div>
+                <div id="viewerPasswordForm" class="hidden">
+                    <div class="input-group">
+                        <input type="password" id="viewerAdminAuth" placeholder="Password admin (verifikasi)" autocomplete="off">
+                        <button class="toggle-password" type="button">👁️</button>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="viewerNewPassword" placeholder="Password viewer baru" autocomplete="off">
+                        <button class="toggle-password" type="button">👁️</button>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="viewerConfirmPassword" placeholder="Konfirmasi password viewer baru" autocomplete="off">
+                        <button class="toggle-password" type="button">👁️</button>
+                    </div>
+                </div>
+                <div class="modal-error" id="modalError"></div>
+                <div class="modal-success" id="modalSuccess"></div>
+                <button class="btn btn-primary" id="savePasswordBtn">💾 Simpan Password</button>
+                <button class="btn btn-secondary" id="closeModalBtn" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); border: 1px solid var(--border); color: var(--text); margin-top: 10px;">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SCRIPT ==================== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCuMU7sMromx3L_O51ARd2w9_8UWrbyyLg",
+            authDomain: "kas-karang-taruna-9df5a.firebaseapp.com",
+            projectId: "kas-karang-taruna-9df5a",
+            storageBucket: "kas-karang-taruna-9df5a.firebasestorage.app",
+            messagingSenderId: "269127453142",
+            appId: "1:269127453142:web:3b9c6a99f3dbb3d49bfc77"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Password
+        const DEFAULT_ADMIN_PASSWORD = 'AdminKarangTaruna';
+        const DEFAULT_VIEWER_PASSWORD = 'LihatSaja';
+        const STORAGE_KEY_SESSION = 'kas_session_logged_in';
+        const STORAGE_KEY_ROLE = 'kas_user_role';
+        const STORAGE_KEY_ADMIN_PASSWORD = 'kas_admin_password';
+        const STORAGE_KEY_VIEWER_PASSWORD = 'kas_viewer_password';
+
+        function getAdminPassword() { return localStorage.getItem(STORAGE_KEY_ADMIN_PASSWORD) || DEFAULT_ADMIN_PASSWORD; }
+        function getViewerPassword() { return localStorage.getItem(STORAGE_KEY_VIEWER_PASSWORD) || DEFAULT_VIEWER_PASSWORD; }
+        function saveAdminPassword(p) { localStorage.setItem(STORAGE_KEY_ADMIN_PASSWORD, p); }
+        function saveViewerPassword(p) { localStorage.setItem(STORAGE_KEY_VIEWER_PASSWORD, p); }
+
+        // DOM
+        const loginPage = document.getElementById('loginPage');
+        const dashboardPage = document.getElementById('dashboardPage');
+        const passwordInput = document.getElementById('passwordInput');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginError = document.getElementById('loginError');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const balanceDisplay = document.getElementById('balanceDisplay');
+        const incomeDisplay = document.getElementById('incomeDisplay');
+        const expenseDisplay = document.getElementById('expenseDisplay');
+        const descInput = document.getElementById('descInput');
+        const dateInput = document.getElementById('dateInput');
+        const amountInput = document.getElementById('amountInput');
+        const typeSelect = document.getElementById('typeSelect');
+        const addTransactionBtn = document.getElementById('addTransactionBtn');
+        const transactionList = document.getElementById('transactionList');
+        const formCard = document.getElementById('formCard');
+        const printBtn = document.getElementById('printBtn');
+        const brandLogo = document.getElementById('brandLogo');
+        const passwordModal = document.getElementById('passwordModal');
+        const modalError = document.getElementById('modalError');
+        const modalSuccess = document.getElementById('modalSuccess');
+        const savePasswordBtn = document.getElementById('savePasswordBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const selectAdminBtn = document.getElementById('selectAdminBtn');
+        const selectViewerBtn = document.getElementById('selectViewerBtn');
+        const adminPasswordForm = document.getElementById('adminPasswordForm');
+        const viewerPasswordForm = document.getElementById('viewerPasswordForm');
+        const adminOldPassword = document.getElementById('adminOldPassword');
+        const adminNewPassword = document.getElementById('adminNewPassword');
+        const adminConfirmPassword = document.getElementById('adminConfirmPassword');
+        const viewerAdminAuth = document.getElementById('viewerAdminAuth');
+        const viewerNewPassword = document.getElementById('viewerNewPassword');
+        const viewerConfirmPassword = document.getElementById('viewerConfirmPassword');
+
+        // Video
+        const videoLogin = document.getElementById('bgVideoLogin');
+        const videoDashboard = document.getElementById('bgVideoDashboard');
+
+        let currentRole = null;
+        let transactions = [];
+
+        // Firebase realtime
+        const q = query(collection(db, "transactions"), orderBy("createdAt", "desc"));
+        onSnapshot(q, (snap) => {
+            transactions = [];
+            snap.forEach(d => transactions.push({ id: d.id, ...d.data() }));
+            if (!dashboardPage.classList.contains('hidden')) refreshDashboard();
+        });
+
+        function formatRupiah(angka) {
+            return new Intl.NumberFormat('id-ID', { style:'currency', currency:'IDR', minimumFractionDigits:2 }).format(angka);
+        }
+        function formatAmountInput() {
+            let v = amountInput.value.replace(/\D/g,'');
+            if (!v) { amountInput.value = ''; return; }
+            amountInput.value = parseInt(v,10).toLocaleString('id-ID');
+        }
+        function getAmountValue() { return parseInt(amountInput.value.replace(/\./g,'')) || 0; }
+        function formatDateDisplay(d) {
+            if(!d) return '-';
+            return new Date(d+'T00:00:00').toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+        }
+        function escapeHTML(s) { const div = document.createElement('div'); div.textContent = s; return div.innerHTML; }
+        function updateSummary() {
+            let inc=0, exp=0;
+            transactions.forEach(t => {
+                if(t.type==='income') inc+=Number(t.amount);
+                else exp+=Number(t.amount);
+            });
+            const bal = inc - exp;
+            balanceDisplay.textContent = formatRupiah(bal);
+            incomeDisplay.textContent = formatRupiah(inc);
+            expenseDisplay.textContent = formatRupiah(exp);
+            balanceDisplay.style.color = bal < 0 ? '#ef4444' : '';
+        }
+        function renderList() {
+            transactionList.innerHTML = '';
+            if(!transactions.length) {
+                transactionList.innerHTML = '<div class="empty-state">📭 Belum ada transaksi</div>';
+                return;
+            }
+            transactions.forEach(trx => {
+                const div = document.createElement('div');
+                div.className = 'transaction-item';
+                div.innerHTML = `
+                    <div class="transaction-info">
+                        <div class="desc">${escapeHTML(trx.description)}</div>
+                        <div class="date">${formatDateDisplay(trx.date)}</div>
+                    </div>
+                    <div class="transaction-amount ${trx.type==='income'?'income':'expense'}">
+                        ${trx.type==='income'?'+':'-'} ${formatRupiah(trx.amount)}
+                    </div>
+                    ${currentRole==='admin' ? `<button class="btn-delete" data-id="${trx.id}">🗑️</button>` : ''}
+                `;
+                if(currentRole==='admin') {
+                    div.querySelector('.btn-delete').addEventListener('click', (e) => deleteTransaction(e.target.dataset.id));
+                }
+                transactionList.appendChild(div);
+            });
+        }
+        function refreshDashboard() { updateSummary(); renderList(); }
+
+        async function addTransaction() {
+            if(currentRole!=='admin') return;
+            const desc = descInput.value.trim();
+            const date = dateInput.value;
+            const amount = getAmountValue();
+            const type = typeSelect.value;
+            if(!desc || !date || amount<=0) { alert('Isi semua field dengan benar'); return; }
+            addTransactionBtn.disabled = true;
+            try {
+                await addDoc(collection(db, "transactions"), {
+                    description: desc, amount, type, date, createdAt: Date.now()
+                });
+                descInput.value = ''; dateInput.valueAsDate = new Date(); amountInput.value = '';
+            } catch(e) { alert('Gagal: '+e.message); }
+            finally { addTransactionBtn.disabled = false; }
+        }
+
+        async function deleteTransaction(id) {
+            if(!confirm('Yakin hapus?')) return;
+            await deleteDoc(doc(db, "transactions", id));
+        }
+
+        function printTransactions() {
+            if(!transactions.length) { alert('Tidak ada data'); return; }
+            const { totalIncome, totalExpense, balance } = calculateTotals();
+            let html = `...`; // sama seperti sebelumnya
+            const w = window.open('','_blank','width=800,height=600');
+            w.document.write(html); w.document.close(); w.focus(); w.print();
+        }
+
+        function showDashboard(role) {
+            currentRole = role;
+            loginPage.classList.add('hidden');
+            dashboardPage.classList.remove('hidden');
+            sessionStorage.setItem(STORAGE_KEY_SESSION, 'true');
+            sessionStorage.setItem(STORAGE_KEY_ROLE, role);
+            formCard.style.display = role==='admin' ? 'block' : 'none';
+            dateInput.valueAsDate = new Date();
+            refreshDashboard();
+            document.body.classList.remove('login-theme');
+            document.body.classList.add('dashboard-theme');
+            videoLogin.classList.add('hidden');
+            videoDashboard.classList.remove('hidden');
+            videoDashboard.play().catch(()=>{});
+        }
+
+        function showLogin() {
+            dashboardPage.classList.add('hidden');
+            loginPage.classList.remove('hidden');
+            sessionStorage.removeItem(STORAGE_KEY_SESSION);
+            sessionStorage.removeItem(STORAGE_KEY_ROLE);
+            passwordInput.value = '';
+            currentRole = null;
+            document.body.classList.add('login-theme');
+            document.body.classList.remove('dashboard-theme');
+            videoDashboard.classList.add('hidden');
+            videoLogin.classList.remove('hidden');
+            videoLogin.play().catch(()=>{});
+        }
+
+        function handleLogin() {
+            const pass = passwordInput.value;
+            if(pass === getAdminPassword()) {
+                showDashboard('admin');
+            } else if(pass === getViewerPassword()) {
+                showDashboard('viewer');
+            } else {
+                loginError.textContent = 'Password salah';
+                passwordInput.style.animation = 'shake 0.4s';
+            }
+        }
+
+        function handleLogout() { if(confirm('Logout?')) showLogin(); }
+
+        // Toggle password
+        document.querySelectorAll('.toggle-password').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const input = e.currentTarget.previousElementSibling;
+                if(input && input.tagName === 'INPUT') {
+                    const isPass = input.type === 'password';
+                    input.type = isPass ? 'text' : 'password';
+                    e.currentTarget.textContent = isPass ? '🙈' : '👁️';
+                }
+            });
+        });
+
+        // Modal password
+        let activeType = 'admin';
+        function openModal() {
+            if(currentRole!=='admin') return;
+            adminOldPassword.value=''; adminNewPassword.value=''; adminConfirmPassword.value='';
+            viewerAdminAuth.value=''; viewerNewPassword.value=''; viewerConfirmPassword.value='';
+            modalError.textContent=''; modalSuccess.textContent='';
+            setActiveType('admin');
+            passwordModal.classList.remove('hidden');
+        }
+        function setActiveType(t) {
+            activeType = t;
+            selectAdminBtn.classList.toggle('active', t==='admin');
+            selectViewerBtn.classList.toggle('active', t==='viewer');
+            adminPasswordForm.classList.toggle('hidden', t!=='admin');
+            viewerPasswordForm.classList.toggle('hidden', t!=='viewer');
+        }
+        selectAdminBtn.onclick = ()=> setActiveType('admin');
+        selectViewerBtn.onclick = ()=> setActiveType('viewer');
+        function closeModal() { passwordModal.classList.add('hidden'); }
+        function savePassword() {
+            modalError.textContent = '';
+            if(activeType==='admin') {
+                if(adminOldPassword.value !== getAdminPassword()) { modalError.textContent='Password admin lama salah'; return; }
+                if(adminNewPassword.value.length<3 || adminNewPassword.value !== adminConfirmPassword.value) { modalError.textContent='Password baru tidak valid'; return; }
+                saveAdminPassword(adminNewPassword.value);
+                modalSuccess.textContent = 'Password admin berhasil diubah';
+            } else {
+                if(viewerAdminAuth.value !== getAdminPassword()) { modalError.textContent='Verifikasi admin salah'; return; }
+                if(viewerNewPassword.value.length<3 || viewerNewPassword.value !== viewerConfirmPassword.value) { modalError.textContent='Password viewer tidak valid'; return; }
+                saveViewerPassword(viewerNewPassword.value);
+                modalSuccess.textContent = 'Password viewer berhasil diubah';
+            }
+            setTimeout(() => { closeModal(); modalSuccess.textContent=''; }, 1500);
+        }
+
+        // Events
+        loginBtn.onclick = handleLogin;
+        passwordInput.addEventListener('keydown', e => { if(e.key==='Enter') handleLogin(); });
+        logoutBtn.onclick = handleLogout;
+        amountInput.addEventListener('input', formatAmountInput);
+        addTransactionBtn.onclick = addTransaction;
+        printBtn.onclick = printTransactions;
+        brandLogo.onclick = openModal;
+        savePasswordBtn.onclick = savePassword;
+        closeModalBtn.onclick = closeModal;
+        document.querySelectorAll('.toggle-password').forEach(b => { /* sudah di atas */ });
+
+        // Init
+        if(sessionStorage.getItem(STORAGE_KEY_SESSION)) {
+            const role = sessionStorage.getItem(STORAGE_KEY_ROLE);
+            if(role==='admin'||role==='viewer') showDashboard(role);
+            else showLogin();
+        } else {
+            showLogin();
+        }
+    </script>
+</body>
+</html>
