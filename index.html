@@ -25,17 +25,15 @@
             --danger: #B71C1C;
             --danger-bg: #ffebee;
             --bg: #2E1E0F;
-            --card-bg: rgba(20, 10, 5, 0.4);  /* frosted glass gelap */
-            --text: #FFF8DC;                  /* Putih Gading */
-            --text-secondary: #FFD700;        /* Emas */
-            --border: rgba(255, 248, 220, 0.3);
+            --card-bg: rgba(255,248,235,0.95);
+            --text: #3E2723;
+            --text-secondary: #5D4037;
+            --border: #BCAAA4;
             --radius: 16px;
             --radius-sm: 10px;
             --shadow: 0 8px 32px rgba(0,0,0,0.3);
             --shadow-lg: 0 20px 40px rgba(0,0,0,0.2);
             --transition: 0.2s ease;
-            --glass-blur: 15px;
-            --btn-gradient: linear-gradient(135deg, #D4AF37, #B87333); /* Emas-Tembaga */
         }
 
         body {
@@ -67,24 +65,25 @@
             top: 0; left: 0;
             width: 100%; height: 100%;
             z-index: -1;
+            background: rgba(20, 10, 5, 0.4); /* default untuk login */
             transition: background 0.3s;
         }
 
         /* ============================================================
-           TEMA LOGIN (Coklat Tua, Emas, Putih Gading, Krem)
+           TEMA LOGIN (Coklat Tua, Emas, Kuning Keemasan, Krem)
            ============================================================ */
         body.login-theme {
             --primary: #D4AF37;
             --primary-hover: #B8960C;
             --bg: #2E1E0F;
-            --card-bg: rgba(20, 10, 5, 0.5);
-            --text: #FFF8DC;
-            --text-secondary: #FFD700;
-            --border: rgba(255, 248, 220, 0.3);
-            --shadow: 0 8px 32px rgba(0,0,0,0.4);
+            --card-bg: rgba(255,248,235,0.95);
+            --text: #3E2723;
+            --text-secondary: #5D4037;
+            --border: #BCAAA4;
+            --shadow: 0 8px 32px rgba(0,0,0,0.3);
         }
         body.login-theme .bg-overlay {
-            background: rgba(20, 10, 5, 0.5);
+            background: rgba(20, 10, 5, 0.4);
         }
 
         /* ============================================================
@@ -98,33 +97,19 @@
             --danger: #B71C1C;
             --danger-bg: #ffebee;
             --bg: #FFF8E1;
-            --card-bg: rgba(255, 255, 255, 0.25);
+            --card-bg: #ffffff;
             --text: #3E2723;
             --text-secondary: #5D4037;
-            --border: rgba(255, 255, 255, 0.5);
-            --shadow: 0 4px 16px rgba(0,0,0,0.1);
+            --border: #D7CCC8;
+            --shadow: 0 4px 16px rgba(0,0,0,0.08);
         }
         body.dashboard-theme .bg-overlay {
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.2);
         }
 
         /* ============================================================
-           KOMPONEN FROSTED GLASS (Login, Card, Form, Modal, Header)
+           KOMPONEN GLOBAL
            ============================================================ */
-        .login-card,
-        .card,
-        .form-card,
-        .transaction-list-card,
-        .modal-card,
-        .dashboard-header {
-            background: var(--card-bg);
-            backdrop-filter: blur(var(--glass-blur));
-            -webkit-backdrop-filter: blur(var(--glass-blur));
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-        }
-
         .app-container {
             width: 100%;
             max-width: 580px;
@@ -155,15 +140,20 @@
         }
 
         .login-card {
+            background: var(--card-bg);
+            border-radius: 20px;
             padding: 40px 32px 36px;
             width: 100%;
             max-width: 420px;
+            box-shadow: var(--shadow-lg);
             text-align: center;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
         }
         .login-icon {
             width: 64px;
             height: 64px;
-            background: var(--btn-gradient);
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -171,13 +161,12 @@
             margin: 0 auto 20px;
             font-size: 28px;
             color: white;
-            box-shadow: 0 8px 24px rgba(212, 175, 55, 0.5);
+            box-shadow: 0 8px 24px rgba(212, 175, 55, 0.4);
         }
         .login-card h1 {
             font-size: 1.5rem;
             font-weight: 700;
             margin-bottom: 6px;
-            color: var(--text);
         }
         .login-card p {
             font-size: 0.9rem;
@@ -189,37 +178,23 @@
             position: relative;
             margin-bottom: 20px;
         }
-        .input-group input,
-        .form-row input,
-        .form-row select {
+        .input-group input {
             width: 100%;
             padding: 14px 16px;
             padding-right: 48px;
-            border: 1px solid var(--border);
+            border: 2px solid var(--border);
             border-radius: var(--radius-sm);
             font-size: 1rem;
             font-family: inherit;
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255,255,255,0.8);
             color: var(--text);
             outline: none;
             transition: all var(--transition);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
         }
-        .form-row input, .form-row select {
-            padding-right: 16px;
-        }
-        .input-group input::placeholder,
-        .form-row input::placeholder {
-            color: var(--text-secondary);
-            opacity: 0.8;
-        }
-        .input-group input:focus,
-        .form-row input:focus,
-        .form-row select:focus {
-            background: rgba(255, 255, 255, 0.2);
+        .input-group input:focus {
             border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.2);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(255,179,0,0.2);
         }
         .toggle-password {
             position: absolute;
@@ -253,28 +228,26 @@
             letter-spacing: 0.01em;
         }
         .btn-primary {
-            background: var(--btn-gradient);
+            background: var(--primary);
             color: #fff;
             width: 100%;
-            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+            box-shadow: 0 4px 14px rgba(212,175,55,0.4);
         }
         .btn-primary:hover {
-            background: linear-gradient(135deg, #FFD700, #CD7F32);
+            background: var(--primary-hover);
             transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.6);
         }
         .btn-logout {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background: #fff;
             color: var(--text);
-            border: 1px solid var(--border);
+            border: 1.5px solid var(--border);
             padding: 9px 18px;
             font-size: 0.85rem;
             border-radius: 8px;
         }
         .btn-logout:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: var(--danger-bg);
+            border-color: var(--danger);
             color: var(--danger);
         }
         .error-message {
@@ -302,7 +275,11 @@
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 12px;
+            background: var(--card-bg);
             padding: 18px 22px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
         }
         .brand {
             display: flex;
@@ -316,7 +293,7 @@
         .logo {
             width: 38px;
             height: 38px;
-            background: var(--btn-gradient);
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
             border-radius: 10px;
             display: flex;
             align-items: center;
@@ -331,7 +308,6 @@
             pointer-events: none;
             color: var(--text);
         }
-
         .summary-cards {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
@@ -346,12 +322,16 @@
             }
         }
         .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
             padding: 18px 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
             transition: all var(--transition);
         }
         .card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.07);
         }
         .card .label {
             font-size: 0.75rem;
@@ -364,20 +344,22 @@
         .card .value {
             font-size: 1.3rem;
             font-weight: 700;
-            color: var(--text);
         }
         .card.balance .value { color: var(--primary); font-size: 1.5rem; }
         .card.income .value { color: var(--success); }
         .card.expense .value { color: var(--danger); }
 
         .form-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
             padding: 22px 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
         }
         .form-card h3 {
             font-size: 1rem;
             font-weight: 700;
             margin-bottom: 16px;
-            color: var(--text);
         }
         .form-row {
             display: flex;
@@ -389,6 +371,21 @@
         .form-row select {
             flex: 1;
             min-width: 100px;
+            padding: 12px 14px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            font-family: inherit;
+            background: #f8fafc;
+            transition: all var(--transition);
+            outline: none;
+            color: var(--text);
+        }
+        .form-row input:focus,
+        .form-row select:focus {
+            border-color: var(--primary);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(255,179,0,0.2);
         }
         .form-card .btn-primary {
             width: auto;
@@ -396,7 +393,11 @@
         }
 
         .transaction-list-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
             padding: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
         }
         .header-row {
             display: flex;
@@ -405,10 +406,8 @@
             margin-bottom: 14px;
         }
         .btn-print {
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid var(--border);
+            background: var(--card-bg);
+            border: 1.5px solid var(--border);
             padding: 6px 14px;
             font-size: 0.85rem;
             border-radius: 8px;
@@ -416,7 +415,7 @@
             display: flex;
             align-items: center;
             gap: 4px;
-            color: var(--text);
+            color: var(--text-secondary);
             transition: all var(--transition);
         }
         .btn-print:hover {
@@ -435,28 +434,26 @@
         }
         .transaction-item:last-child { border-bottom: none; }
         .transaction-item:hover {
-            background: rgba(255,255,255,0.1);
+            background: #fafbfc;
             margin: 0 -12px;
             padding-left: 12px;
             padding-right: 12px;
             border-radius: 8px;
         }
         .transaction-info { flex: 1; min-width: 120px; }
-        .transaction-info .desc { font-weight: 600; font-size: 0.9rem; color: var(--text); }
+        .transaction-info .desc { font-weight: 600; font-size: 0.9rem; }
         .transaction-info .date { font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px; }
         .transaction-amount { font-weight: 700; font-size: 0.95rem; }
         .transaction-amount.income { color: var(--success); }
         .transaction-amount.expense { color: var(--danger); }
         .btn-delete {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-            border: 1px solid var(--border);
-            color: var(--text-secondary);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: #94a3b8;
             font-size: 1rem;
             padding: 8px;
             border-radius: 8px;
-            cursor: pointer;
             transition: all var(--transition);
         }
         .btn-delete:hover {
@@ -477,8 +474,8 @@
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
-            backdrop-filter: blur(8px);
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -486,15 +483,22 @@
             padding: 16px;
             animation: fadeIn 0.2s ease;
         }
-        .modal-overlay.hidden { display: none; }
+        .modal-overlay.hidden {
+            display: none;
+        }
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
         .modal-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
             padding: 28px 24px;
             width: 100%;
             max-width: 380px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            animation: slideUp 0.25s ease;
+            border: 1px solid var(--border);
         }
         @keyframes slideUp {
             from { transform: translateY(30px); opacity: 0; }
@@ -504,7 +508,6 @@
             font-size: 1.1rem;
             font-weight: 700;
             margin-bottom: 6px;
-            color: var(--text);
         }
         .modal-card .modal-subtitle {
             font-size: 0.8rem;
@@ -519,25 +522,25 @@
         .password-type-selector button {
             flex: 1;
             padding: 10px;
-            border: 1px solid var(--border);
+            border: 2px solid var(--border);
             border-radius: var(--radius-sm);
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(5px);
-            color: var(--text);
+            background: #f8fafc;
             font-weight: 600;
             cursor: pointer;
             transition: all var(--transition);
         }
         .password-type-selector button.active {
-            background: var(--btn-gradient);
-            color: #fff;
-            border-color: transparent;
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
         }
 
-        .hidden { display: none !important; }
+        .hidden {
+            display: none !important;
+        }
 
         /* ============================================================
-           CETAK (dipertahankan)
+           CETAK (dipertahankan dari kode lama)
            ============================================================ */
         @media print {
             body.print-page {
@@ -546,14 +549,41 @@
                 font-family: 'Inter', sans-serif;
                 color: #000;
             }
-            .print-header { text-align: center; margin-bottom: 20px; }
-            .print-header h2 { font-size: 1.5rem; margin-bottom: 4px; color: #4f46e5; }
-            .print-header p { font-size: 0.9rem; color: #555; }
-            .print-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
-            .print-table th, .print-table td { border: 1px solid #ddd; padding: 10px 12px; text-align: left; font-size: 0.9rem; }
-            .print-table th { background: #f1f5f9; font-weight: 600; }
-            .print-income { color: #10b981; font-weight: 600; }
-            .print-expense { color: #ef4444; font-weight: 600; }
+            .print-header {
+                text-align: center;
+                margin-bottom: 20px;
+            }
+            .print-header h2 {
+                font-size: 1.5rem;
+                margin-bottom: 4px;
+            }
+            .print-header p {
+                font-size: 0.9rem;
+                color: #555;
+            }
+            .print-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 16px;
+            }
+            .print-table th, .print-table td {
+                border: 1px solid #ddd;
+                padding: 10px 12px;
+                text-align: left;
+                font-size: 0.9rem;
+            }
+            .print-table th {
+                background: #f1f5f9;
+                font-weight: 600;
+            }
+            .print-income {
+                color: #10b981;
+                font-weight: 600;
+            }
+            .print-expense {
+                color: #ef4444;
+                font-weight: 600;
+            }
         }
     </style>
 </head>
@@ -679,7 +709,7 @@
                 <div class="modal-error" id="modalError"></div>
                 <div class="modal-success" id="modalSuccess"></div>
                 <button class="btn btn-primary" id="savePasswordBtn">💾 Simpan Password</button>
-                <button class="btn btn-secondary" id="closeModalBtn" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); border: 1px solid var(--border); color: var(--text); margin-top: 10px;">Batal</button>
+                <button class="btn btn-secondary" id="closeModalBtn">Batal</button>
             </div>
         </div>
     </div>
@@ -701,7 +731,9 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Password
+        // ============================================================
+        // KONFIGURASI PASSWORD
+        // ============================================================
         const DEFAULT_ADMIN_PASSWORD = 'AdminKarangTaruna';
         const DEFAULT_VIEWER_PASSWORD = 'LihatSaja';
         const STORAGE_KEY_SESSION = 'kas_session_logged_in';
@@ -711,10 +743,12 @@
 
         function getAdminPassword() { return localStorage.getItem(STORAGE_KEY_ADMIN_PASSWORD) || DEFAULT_ADMIN_PASSWORD; }
         function getViewerPassword() { return localStorage.getItem(STORAGE_KEY_VIEWER_PASSWORD) || DEFAULT_VIEWER_PASSWORD; }
-        function saveAdminPassword(p) { localStorage.setItem(STORAGE_KEY_ADMIN_PASSWORD, p); }
-        function saveViewerPassword(p) { localStorage.setItem(STORAGE_KEY_VIEWER_PASSWORD, p); }
+        function saveAdminPassword(newPass) { localStorage.setItem(STORAGE_KEY_ADMIN_PASSWORD, newPass); }
+        function saveViewerPassword(newPass) { localStorage.setItem(STORAGE_KEY_VIEWER_PASSWORD, newPass); }
 
-        // DOM
+        // ============================================================
+        // REFERENSI DOM (tetap seperti lama)
+        // ============================================================
         const loginPage = document.getElementById('loginPage');
         const dashboardPage = document.getElementById('dashboardPage');
         const passwordInput = document.getElementById('passwordInput');
@@ -749,118 +783,181 @@
         const viewerNewPassword = document.getElementById('viewerNewPassword');
         const viewerConfirmPassword = document.getElementById('viewerConfirmPassword');
 
-        // Video
+        // VIDEO BACKGROUND
         const videoLogin = document.getElementById('bgVideoLogin');
         const videoDashboard = document.getElementById('bgVideoDashboard');
 
         let currentRole = null;
         let transactions = [];
 
-        // Firebase realtime
+        // ============================================================
+        // SINKRONISASI REAL-TIME DARI FIREBASE
+        // ============================================================
         const q = query(collection(db, "transactions"), orderBy("createdAt", "desc"));
-        onSnapshot(q, (snap) => {
+        onSnapshot(q, (snapshot) => {
             transactions = [];
-            snap.forEach(d => transactions.push({ id: d.id, ...d.data() }));
+            snapshot.forEach((docItem) => transactions.push({ id: docItem.id, ...docItem.data() }));
             if (!dashboardPage.classList.contains('hidden')) refreshDashboard();
+        }, (error) => {
+            console.error("Error mengambil data:", error);
+            transactionList.innerHTML = `<p style="color:red; text-align:center;">Gagal memuat data.</p>`;
         });
 
+        // ============================================================
+        // HELPER FUNCTIONS
+        // ============================================================
         function formatRupiah(angka) {
-            return new Intl.NumberFormat('id-ID', { style:'currency', currency:'IDR', minimumFractionDigits:2 }).format(angka);
+            return new Intl.NumberFormat('id-ID', { style:'currency', currency:'IDR', minimumFractionDigits:2, maximumFractionDigits:2 }).format(angka);
         }
         function formatAmountInput() {
-            let v = amountInput.value.replace(/\D/g,'');
-            if (!v) { amountInput.value = ''; return; }
-            amountInput.value = parseInt(v,10).toLocaleString('id-ID');
+            let value = amountInput.value.replace(/\D/g, '');
+            if (value === '') { amountInput.value = ''; return; }
+            amountInput.value = parseInt(value, 10).toLocaleString('id-ID');
         }
-        function getAmountValue() { return parseInt(amountInput.value.replace(/\./g,'')) || 0; }
-        function formatDateDisplay(d) {
-            if(!d) return '-';
-            return new Date(d+'T00:00:00').toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+        function getAmountValue() { return parseInt(amountInput.value.replace(/\./g, '')) || 0; }
+        function formatDateDisplay(dateStr) {
+            if (!dateStr) return '-';
+            return new Date(dateStr + 'T00:00:00').toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' });
         }
-        function escapeHTML(s) { const div = document.createElement('div'); div.textContent = s; return div.innerHTML; }
-        function updateSummary() {
-            let inc=0, exp=0;
-            transactions.forEach(t => {
-                if(t.type==='income') inc+=Number(t.amount);
-                else exp+=Number(t.amount);
+        function escapeHTML(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+        function calculateTotals() {
+            let totalIncome = 0, totalExpense = 0;
+            transactions.forEach(trx => {
+                const nominal = Number(trx.amount) || 0;
+                if (trx.type === 'income') totalIncome += nominal;
+                else if (trx.type === 'expense') totalExpense += nominal;
             });
-            const bal = inc - exp;
-            balanceDisplay.textContent = formatRupiah(bal);
-            incomeDisplay.textContent = formatRupiah(inc);
-            expenseDisplay.textContent = formatRupiah(exp);
-            balanceDisplay.style.color = bal < 0 ? '#ef4444' : '';
+            return { totalIncome, totalExpense, balance: totalIncome - totalExpense };
         }
-        function renderList() {
+        function updateSummaryDisplay() {
+            const { totalIncome, totalExpense, balance } = calculateTotals();
+            balanceDisplay.textContent = formatRupiah(balance);
+            incomeDisplay.textContent = formatRupiah(totalIncome);
+            expenseDisplay.textContent = formatRupiah(totalExpense);
+            balanceDisplay.style.color = balance < 0 ? '#ef4444' : '';
+        }
+        function renderTransactionList() {
             transactionList.innerHTML = '';
-            if(!transactions.length) {
-                transactionList.innerHTML = '<div class="empty-state">📭 Belum ada transaksi</div>';
+            if (!transactions.length) {
+                transactionList.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>Belum ada transaksi.</p></div>`;
                 return;
             }
             transactions.forEach(trx => {
-                const div = document.createElement('div');
-                div.className = 'transaction-item';
-                div.innerHTML = `
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'transaction-item';
+                const amountClass = trx.type === 'income' ? 'income' : 'expense';
+                const prefix = trx.type === 'income' ? '+' : '-';
+                itemDiv.innerHTML = `
                     <div class="transaction-info">
                         <div class="desc">${escapeHTML(trx.description)}</div>
                         <div class="date">${formatDateDisplay(trx.date)}</div>
                     </div>
-                    <div class="transaction-amount ${trx.type==='income'?'income':'expense'}">
-                        ${trx.type==='income'?'+':'-'} ${formatRupiah(trx.amount)}
-                    </div>
-                    ${currentRole==='admin' ? `<button class="btn-delete" data-id="${trx.id}">🗑️</button>` : ''}
+                    <div class="transaction-amount ${amountClass}">${prefix} ${formatRupiah(trx.amount)}</div>
+                    ${currentRole === 'admin' ? `<button class="btn-delete" data-id="${trx.id}">🗑️</button>` : ''}
                 `;
-                if(currentRole==='admin') {
-                    div.querySelector('.btn-delete').addEventListener('click', (e) => deleteTransaction(e.target.dataset.id));
+                if (currentRole === 'admin') {
+                    itemDiv.querySelector('.btn-delete').addEventListener('click', function() {
+                        deleteTransaction(this.getAttribute('data-id'));
+                    });
                 }
-                transactionList.appendChild(div);
+                transactionList.appendChild(itemDiv);
             });
         }
-        function refreshDashboard() { updateSummary(); renderList(); }
+        function refreshDashboard() {
+            updateSummaryDisplay();
+            renderTransactionList();
+        }
 
+        // ============================================================
+        // FIREBASE CRUD
+        // ============================================================
         async function addTransaction() {
-            if(currentRole!=='admin') return;
-            const desc = descInput.value.trim();
-            const date = dateInput.value;
+            if (currentRole !== 'admin') return;
+            const description = descInput.value.trim();
+            const dateValue = dateInput.value;
             const amount = getAmountValue();
             const type = typeSelect.value;
-            if(!desc || !date || amount<=0) { alert('Isi semua field dengan benar'); return; }
+            if (!description || !dateValue || amount <= 0) { alert('Lengkapi data dengan benar.'); return; }
+            const originalBtnText = addTransactionBtn.innerHTML;
+            addTransactionBtn.innerHTML = '⏳ Menyimpan...';
             addTransactionBtn.disabled = true;
             try {
                 await addDoc(collection(db, "transactions"), {
-                    description: desc, amount, type, date, createdAt: Date.now()
+                    description, amount, type, date: dateValue, createdAt: Date.now()
                 });
                 descInput.value = ''; dateInput.valueAsDate = new Date(); amountInput.value = '';
-            } catch(e) { alert('Gagal: '+e.message); }
-            finally { addTransactionBtn.disabled = false; }
+            } catch (error) { alert('Gagal: ' + error.message); }
+            finally { addTransactionBtn.innerHTML = originalBtnText; addTransactionBtn.disabled = false; }
         }
-
         async function deleteTransaction(id) {
-            if(!confirm('Yakin hapus?')) return;
+            if (currentRole !== 'admin') return;
+            if (!confirm('Yakin ingin menghapus transaksi ini?')) return;
             await deleteDoc(doc(db, "transactions", id));
         }
 
+        // ============================================================
+        // FITUR CETAK (dari kode lama)
+        // ============================================================
         function printTransactions() {
-            if(!transactions.length) { alert('Tidak ada data'); return; }
+            if (transactions.length === 0) { alert('Tidak ada transaksi untuk dicetak.'); return; }
             const { totalIncome, totalExpense, balance } = calculateTotals();
-            let html = `...`; // sama seperti sebelumnya
-            const w = window.open('','_blank','width=800,height=600');
-            w.document.write(html); w.document.close(); w.focus(); w.print();
+            let html = `<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>Cetak Riwayat Transaksi</title><style>
+                body { font-family: 'Inter', sans-serif; padding: 30px; color: #1e293b; }
+                .print-header { text-align: center; border-bottom: 2px solid #4f46e5; padding-bottom: 16px; margin-bottom: 24px; }
+                .print-header h2 { font-size: 1.6rem; color: #4f46e5; }
+                .summary-box { display: flex; gap: 12px; margin-bottom: 24px; }
+                .summary-item { flex:1; background:#f8fafc; padding:12px; border-radius:8px; text-align:center; }
+                .summary-item .label { font-size:0.75rem; text-transform:uppercase; color:#64748b; }
+                .summary-item .value { font-size:1.2rem; font-weight:700; }
+                table { width:100%; border-collapse:collapse; }
+                th, td { padding:10px; border:1px solid #ddd; }
+                th { background:#f1f5f9; }
+                .income { color:#10b981; font-weight:600; }
+                .expense { color:#ef4444; font-weight:600; }
+            </style></head><body>
+                <div class="print-header"><h2>💰 Kas Karang Taruna Ponokawan Rt.08</h2><p>Laporan Riwayat Transaksi</p></div>
+                <div class="summary-box">
+                    <div class="summary-item"><div class="label">Pemasukan</div><div class="value income">${formatRupiah(totalIncome)}</div></div>
+                    <div class="summary-item"><div class="label">Pengeluaran</div><div class="value expense">${formatRupiah(totalExpense)}</div></div>
+                    <div class="summary-item"><div class="label">Saldo</div><div class="value" style="color:${balance<0?'#ef4444':'#4f46e5'}">${formatRupiah(balance)}</div></div>
+                </div>
+                <table><thead><tr><th>No</th><th>Tanggal</th><th>Keterangan</th><th>Jenis</th><th>Nominal</th></tr></thead><tbody>`;
+            transactions.forEach((trx, i) => {
+                const nominalClass = trx.type === 'income' ? 'income' : 'expense';
+                const prefix = trx.type === 'income' ? '+' : '-';
+                html += `<tr><td>${i+1}</td><td>${formatDateDisplay(trx.date)}</td><td>${escapeHTML(trx.description)}</td><td>${trx.type==='income'?'Pemasukan':'Pengeluaran'}</td><td class="${nominalClass}">${prefix} ${formatRupiah(trx.amount)}</td></tr>`;
+            });
+            html += `</tbody></table></body></html>`;
+            const printWindow = window.open('', '_blank', 'width=800,height=600');
+            if (!printWindow) { alert('Izinkan pop-up untuk mencetak.'); return; }
+            printWindow.document.write(html);
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => printWindow.print(), 500);
         }
 
+        // ============================================================
+        // LOGIN & SESSION (dengan kontrol tema dan video)
+        // ============================================================
         function showDashboard(role) {
             currentRole = role;
             loginPage.classList.add('hidden');
             dashboardPage.classList.remove('hidden');
             sessionStorage.setItem(STORAGE_KEY_SESSION, 'true');
             sessionStorage.setItem(STORAGE_KEY_ROLE, role);
-            formCard.style.display = role==='admin' ? 'block' : 'none';
+            formCard.style.display = (role === 'admin') ? 'block' : 'none';
             dateInput.valueAsDate = new Date();
             refreshDashboard();
+            // Ganti tema dan video background
             document.body.classList.remove('login-theme');
             document.body.classList.add('dashboard-theme');
             videoLogin.classList.add('hidden');
             videoDashboard.classList.remove('hidden');
-            videoDashboard.play().catch(()=>{});
+            videoDashboard.play().catch(() => {});
         }
 
         function showLogin() {
@@ -869,95 +966,146 @@
             sessionStorage.removeItem(STORAGE_KEY_SESSION);
             sessionStorage.removeItem(STORAGE_KEY_ROLE);
             passwordInput.value = '';
+            loginError.textContent = '';
+            passwordInput.focus();
             currentRole = null;
+            // Kembalikan tema dan video login
             document.body.classList.add('login-theme');
             document.body.classList.remove('dashboard-theme');
             videoDashboard.classList.add('hidden');
             videoLogin.classList.remove('hidden');
-            videoLogin.play().catch(()=>{});
+            videoLogin.play().catch(() => {});
         }
 
         function handleLogin() {
-            const pass = passwordInput.value;
-            if(pass === getAdminPassword()) {
-                showDashboard('admin');
-            } else if(pass === getViewerPassword()) {
-                showDashboard('viewer');
+            const entered = passwordInput.value;
+            if (entered === getAdminPassword()) {
+                loginError.textContent = '';
+                loginBtn.textContent = '✅ Admin...';
+                loginBtn.disabled = true;
+                setTimeout(() => {
+                    showDashboard('admin');
+                    loginBtn.textContent = '🔓 Masuk ke Dashboard';
+                    loginBtn.disabled = false;
+                }, 400);
+            } else if (entered === getViewerPassword()) {
+                loginError.textContent = '';
+                loginBtn.textContent = '✅ Viewer...';
+                loginBtn.disabled = true;
+                setTimeout(() => {
+                    showDashboard('viewer');
+                    loginBtn.textContent = '🔓 Masuk ke Dashboard';
+                    loginBtn.disabled = false;
+                }, 400);
             } else {
-                loginError.textContent = 'Password salah';
-                passwordInput.style.animation = 'shake 0.4s';
+                loginError.textContent = '❌ Password salah.';
+                passwordInput.style.animation = 'shake 0.4s ease';
+                passwordInput.focus();
+                passwordInput.select();
+                setTimeout(() => { passwordInput.style.animation = ''; }, 400);
             }
         }
 
-        function handleLogout() { if(confirm('Logout?')) showLogin(); }
+        function handleLogout() {
+            if (confirm('Apakah Anda yakin ingin logout?')) showLogin();
+        }
 
-        // Toggle password
+        // ============================================================
+        // TOGGLE PASSWORD
+        // ============================================================
         document.querySelectorAll('.toggle-password').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const input = e.currentTarget.previousElementSibling;
-                if(input && input.tagName === 'INPUT') {
-                    const isPass = input.type === 'password';
-                    input.type = isPass ? 'text' : 'password';
-                    e.currentTarget.textContent = isPass ? '🙈' : '👁️';
+                if (input && input.tagName === 'INPUT') {
+                    const isPassword = input.getAttribute('type') === 'password';
+                    input.setAttribute('type', isPassword ? 'text' : 'password');
+                    e.currentTarget.textContent = isPassword ? '🙈' : '👁️';
                 }
             });
         });
 
-        // Modal password
-        let activeType = 'admin';
-        function openModal() {
-            if(currentRole!=='admin') return;
-            adminOldPassword.value=''; adminNewPassword.value=''; adminConfirmPassword.value='';
-            viewerAdminAuth.value=''; viewerNewPassword.value=''; viewerConfirmPassword.value='';
-            modalError.textContent=''; modalSuccess.textContent='';
-            setActiveType('admin');
+        // ============================================================
+        // MODAL GANTI PASSWORD (sama seperti kode lama)
+        // ============================================================
+        let activePasswordType = 'admin';
+        function openPasswordModal() {
+            if (currentRole !== 'admin') { alert('Hanya admin yang dapat mengganti password.'); return; }
+            adminOldPassword.value = ''; adminNewPassword.value = ''; adminConfirmPassword.value = '';
+            viewerAdminAuth.value = ''; viewerNewPassword.value = ''; viewerConfirmPassword.value = '';
+            modalError.textContent = ''; modalSuccess.textContent = '';
+            document.querySelectorAll('#passwordModal input[type="text"], #passwordModal input[type="password"]').forEach(input => input.setAttribute('type', 'password'));
+            document.querySelectorAll('#passwordModal .toggle-password').forEach(btn => btn.textContent = '👁️');
+            setActivePasswordType('admin');
             passwordModal.classList.remove('hidden');
+            adminOldPassword.focus();
         }
-        function setActiveType(t) {
-            activeType = t;
-            selectAdminBtn.classList.toggle('active', t==='admin');
-            selectViewerBtn.classList.toggle('active', t==='viewer');
-            adminPasswordForm.classList.toggle('hidden', t!=='admin');
-            viewerPasswordForm.classList.toggle('hidden', t!=='viewer');
+        function setActivePasswordType(type) {
+            activePasswordType = type;
+            selectAdminBtn.classList.toggle('active', type === 'admin');
+            selectViewerBtn.classList.toggle('active', type === 'viewer');
+            adminPasswordForm.classList.toggle('hidden', type !== 'admin');
+            viewerPasswordForm.classList.toggle('hidden', type !== 'viewer');
         }
-        selectAdminBtn.onclick = ()=> setActiveType('admin');
-        selectViewerBtn.onclick = ()=> setActiveType('viewer');
-        function closeModal() { passwordModal.classList.add('hidden'); }
-        function savePassword() {
-            modalError.textContent = '';
-            if(activeType==='admin') {
-                if(adminOldPassword.value !== getAdminPassword()) { modalError.textContent='Password admin lama salah'; return; }
-                if(adminNewPassword.value.length<3 || adminNewPassword.value !== adminConfirmPassword.value) { modalError.textContent='Password baru tidak valid'; return; }
-                saveAdminPassword(adminNewPassword.value);
-                modalSuccess.textContent = 'Password admin berhasil diubah';
+        selectAdminBtn.addEventListener('click', () => setActivePasswordType('admin'));
+        selectViewerBtn.addEventListener('click', () => setActivePasswordType('viewer'));
+        function closePasswordModal() { passwordModal.classList.add('hidden'); }
+        function handleSavePassword() {
+            if (currentRole !== 'admin') return;
+            modalError.textContent = ''; modalSuccess.textContent = '';
+            if (activePasswordType === 'admin') {
+                const oldPass = adminOldPassword.value;
+                const newPass = adminNewPassword.value.trim();
+                const confirmPass = adminConfirmPassword.value.trim();
+                if (oldPass !== getAdminPassword()) { modalError.textContent = '❌ Password admin lama salah.'; return; }
+                if (!newPass || newPass.length < 3 || newPass !== confirmPass) { modalError.textContent = '❌ Password baru tidak valid.'; return; }
+                saveAdminPassword(newPass);
+                modalSuccess.textContent = '✅ Password admin berhasil diubah!';
             } else {
-                if(viewerAdminAuth.value !== getAdminPassword()) { modalError.textContent='Verifikasi admin salah'; return; }
-                if(viewerNewPassword.value.length<3 || viewerNewPassword.value !== viewerConfirmPassword.value) { modalError.textContent='Password viewer tidak valid'; return; }
-                saveViewerPassword(viewerNewPassword.value);
-                modalSuccess.textContent = 'Password viewer berhasil diubah';
+                const adminAuth = viewerAdminAuth.value;
+                const newPass = viewerNewPassword.value.trim();
+                const confirmPass = viewerConfirmPassword.value.trim();
+                if (adminAuth !== getAdminPassword()) { modalError.textContent = '❌ Verifikasi password admin salah.'; return; }
+                if (!newPass || newPass.length < 3 || newPass !== confirmPass) { modalError.textContent = '❌ Password viewer baru tidak valid.'; return; }
+                saveViewerPassword(newPass);
+                modalSuccess.textContent = '✅ Password viewer berhasil diubah!';
             }
-            setTimeout(() => { closeModal(); modalSuccess.textContent=''; }, 1500);
+            setTimeout(() => { closePasswordModal(); modalSuccess.textContent = ''; }, 1500);
         }
 
-        // Events
-        loginBtn.onclick = handleLogin;
-        passwordInput.addEventListener('keydown', e => { if(e.key==='Enter') handleLogin(); });
-        logoutBtn.onclick = handleLogout;
-        amountInput.addEventListener('input', formatAmountInput);
-        addTransactionBtn.onclick = addTransaction;
-        printBtn.onclick = printTransactions;
-        brandLogo.onclick = openModal;
-        savePasswordBtn.onclick = savePassword;
-        closeModalBtn.onclick = closeModal;
-        document.querySelectorAll('.toggle-password').forEach(b => { /* sudah di atas */ });
+        // ============================================================
+        // EVENT LISTENERS
+        // ============================================================
+        loginBtn.addEventListener('click', handleLogin);
+        passwordInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); handleLogin(); } });
+        logoutBtn.addEventListener('click', handleLogout);
+        amountInput?.addEventListener('input', formatAmountInput);
+        amountInput?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addTransaction(); } });
+        addTransactionBtn?.addEventListener('click', addTransaction);
+        descInput?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (descInput.value.trim() && getAmountValue() <= 0) amountInput.focus();
+                else addTransaction();
+            }
+        });
+        dateInput?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addTransaction(); } });
+        printBtn.addEventListener('click', printTransactions);
+        brandLogo.addEventListener('click', openPasswordModal);
+        savePasswordBtn.addEventListener('click', handleSavePassword);
+        closeModalBtn.addEventListener('click', closePasswordModal);
+        passwordModal.addEventListener('click', (e) => { if (e.target === passwordModal) closePasswordModal(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !passwordModal.classList.contains('hidden')) closePasswordModal(); });
 
-        // Init
-        if(sessionStorage.getItem(STORAGE_KEY_SESSION)) {
-            const role = sessionStorage.getItem(STORAGE_KEY_ROLE);
-            if(role==='admin'||role==='viewer') showDashboard(role);
-            else showLogin();
+        // ============================================================
+        // INISIALISASI
+        // ============================================================
+        const isLoggedIn = sessionStorage.getItem(STORAGE_KEY_SESSION) === 'true';
+        const savedRole = sessionStorage.getItem(STORAGE_KEY_ROLE);
+        if (isLoggedIn && (savedRole === 'admin' || savedRole === 'viewer')) {
+            showDashboard(savedRole);
         } else {
             showLogin();
+            passwordInput.focus();
         }
     </script>
 </body>
