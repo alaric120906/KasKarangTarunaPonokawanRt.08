@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manajemen Kas Keuangan</title>
+    <title>Kas Karang Taruna Ponokawan Rt. 08</title>
     <style>
         /* ============================================================
            CSS RESET & BASE
@@ -16,29 +16,28 @@
             padding: 0;
         }
 
+        /* Variabel default (login theme) */
         :root {
-            --primary: #4f46e5;
-            --primary-hover: #4338ca;
-            --success: #10b981;
-            --success-bg: #ecfdf5;
-            --danger: #ef4444;
-            --danger-bg: #fef2f2;
-            --warning: #f59e0b;
-            --bg: #f1f5f9;
-            --card-bg: #ffffff;
-            --text: #1e293b;
-            --text-secondary: #64748b;
-            --border: #e2e8f0;
+            --primary: #D4AF37;
+            --primary-hover: #B8960C;
+            --success: #2E7D32;
+            --success-bg: #e8f5e9;
+            --danger: #B71C1C;
+            --danger-bg: #ffebee;
+            --bg: #2E1E0F;
+            --card-bg: rgba(255,248,235,0.95);
+            --text: #3E2723;
+            --text-secondary: #5D4037;
+            --border: #BCAAA4;
             --radius: 16px;
             --radius-sm: 10px;
-            --shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-            --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.08), 0 8px 16px rgba(0, 0, 0, 0.04);
+            --shadow: 0 8px 32px rgba(0,0,0,0.3);
+            --shadow-lg: 0 20px 40px rgba(0,0,0,0.2);
             --transition: 0.2s ease;
         }
 
         body {
             font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: var(--bg);
             color: var(--text);
             min-height: 100vh;
             display: flex;
@@ -47,15 +46,77 @@
             padding: 16px;
             line-height: 1.5;
             -webkit-font-smoothing: antialiased;
+            background: var(--bg);
+            transition: background 0.3s;
         }
 
+        /* ============================================================
+           VIDEO BACKGROUND
+           ============================================================ */
+        .bg-video {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            z-index: -2;
+        }
+        .bg-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            background: rgba(20, 10, 5, 0.4); /* default untuk login */
+            transition: background 0.3s;
+        }
+
+        /* ============================================================
+           TEMA LOGIN (Coklat Tua, Emas, Kuning Keemasan, Krem)
+           ============================================================ */
+        body.login-theme {
+            --primary: #D4AF37;
+            --primary-hover: #B8960C;
+            --bg: #2E1E0F;
+            --card-bg: rgba(255,248,235,0.95);
+            --text: #3E2723;
+            --text-secondary: #5D4037;
+            --border: #BCAAA4;
+            --shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        body.login-theme .bg-overlay {
+            background: rgba(20, 10, 5, 0.4);
+        }
+
+        /* ============================================================
+           TEMA DASHBOARD (Emas Terang, Coklat Gelap, Putih, Merah/Marun)
+           ============================================================ */
+        body.dashboard-theme {
+            --primary: #FFB300;
+            --primary-hover: #FF8F00;
+            --success: #2E7D32;
+            --success-bg: #e8f5e9;
+            --danger: #B71C1C;
+            --danger-bg: #ffebee;
+            --bg: #FFF8E1;
+            --card-bg: #ffffff;
+            --text: #3E2723;
+            --text-secondary: #5D4037;
+            --border: #D7CCC8;
+            --shadow: 0 4px 16px rgba(0,0,0,0.08);
+        }
+        body.dashboard-theme .bg-overlay {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* ============================================================
+           KOMPONEN GLOBAL
+           ============================================================ */
         .app-container {
             width: 100%;
             max-width: 580px;
             position: relative;
+            z-index: 1;
         }
 
-        /* LOGIN PAGE */
         .login-page {
             display: flex;
             flex-direction: column;
@@ -70,7 +131,6 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             20% { transform: translateX(-8px); }
@@ -88,12 +148,12 @@
             box-shadow: var(--shadow-lg);
             text-align: center;
             border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
         }
-
         .login-icon {
             width: 64px;
             height: 64px;
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -101,16 +161,13 @@
             margin: 0 auto 20px;
             font-size: 28px;
             color: white;
-            box-shadow: 0 8px 24px rgba(79, 70, 229, 0.3);
+            box-shadow: 0 8px 24px rgba(212, 175, 55, 0.4);
         }
-
         .login-card h1 {
             font-size: 1.5rem;
             font-weight: 700;
             margin-bottom: 6px;
-            letter-spacing: -0.02em;
         }
-
         .login-card p {
             font-size: 0.9rem;
             color: var(--text-secondary);
@@ -121,7 +178,6 @@
             position: relative;
             margin-bottom: 20px;
         }
-
         .input-group input {
             width: 100%;
             padding: 14px 16px;
@@ -130,18 +186,16 @@
             border-radius: var(--radius-sm);
             font-size: 1rem;
             font-family: inherit;
-            transition: all var(--transition);
-            background: #f8fafc;
+            background: rgba(255,255,255,0.8);
             color: var(--text);
             outline: none;
+            transition: all var(--transition);
         }
-
         .input-group input:focus {
             border-color: var(--primary);
             background: #fff;
-            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.08);
+            box-shadow: 0 0 0 4px rgba(255,179,0,0.2);
         }
-
         .toggle-password {
             position: absolute;
             right: 8px;
@@ -153,8 +207,6 @@
             font-size: 1.2rem;
             padding: 8px;
             color: var(--text-secondary);
-            transition: color var(--transition);
-            line-height: 1;
         }
         .toggle-password:hover {
             color: var(--text);
@@ -174,25 +226,17 @@
             border: none;
             transition: all var(--transition);
             letter-spacing: 0.01em;
-            white-space: nowrap;
         }
-
         .btn-primary {
             background: var(--primary);
             color: #fff;
             width: 100%;
-            box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+            box-shadow: 0 4px 14px rgba(212,175,55,0.4);
         }
         .btn-primary:hover {
             background: var(--primary-hover);
-            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.45);
             transform: translateY(-1px);
         }
-        .btn-primary:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
-        }
-
         .btn-logout {
             background: #fff;
             color: var(--text);
@@ -200,14 +244,12 @@
             padding: 9px 18px;
             font-size: 0.85rem;
             border-radius: 8px;
-            gap: 6px;
         }
         .btn-logout:hover {
-            background: #fef2f2;
+            background: var(--danger-bg);
             border-color: var(--danger);
             color: var(--danger);
         }
-
         .error-message {
             color: var(--danger);
             font-size: 0.85rem;
@@ -217,7 +259,9 @@
             font-weight: 500;
         }
 
-        /* DASHBOARD PAGE */
+        /* ============================================================
+           DASHBOARD
+           ============================================================ */
         .dashboard-page {
             display: flex;
             flex-direction: column;
@@ -225,7 +269,6 @@
             padding-bottom: 40px;
             animation: fadeSlideIn 0.4s ease;
         }
-
         .dashboard-header {
             display: flex;
             align-items: center;
@@ -238,7 +281,6 @@
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
         }
-
         .brand {
             display: flex;
             align-items: center;
@@ -247,14 +289,11 @@
             user-select: none;
             transition: opacity var(--transition);
         }
-        .brand:hover {
-            opacity: 0.8;
-        }
-
+        .brand:hover { opacity: 0.8; }
         .logo {
             width: 38px;
             height: 38px;
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
             border-radius: 10px;
             display: flex;
             align-items: center;
@@ -263,14 +302,12 @@
             font-size: 1.1rem;
             pointer-events: none;
         }
-
         .dashboard-header h2 {
             font-size: 1.2rem;
             font-weight: 700;
-            letter-spacing: -0.02em;
             pointer-events: none;
+            color: var(--text);
         }
-
         .summary-cards {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
@@ -293,8 +330,8 @@
             transition: all var(--transition);
         }
         .card:hover {
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.07);
             transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.07);
         }
         .card .label {
             font-size: 0.75rem;
@@ -307,8 +344,6 @@
         .card .value {
             font-size: 1.3rem;
             font-weight: 700;
-            letter-spacing: -0.02em;
-            word-break: break-all;
         }
         .card.balance .value { color: var(--primary); font-size: 1.5rem; }
         .card.income .value { color: var(--success); }
@@ -350,7 +385,7 @@
         .form-row select:focus {
             border-color: var(--primary);
             background: #fff;
-            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.06);
+            box-shadow: 0 0 0 4px rgba(255,179,0,0.2);
         }
         .form-card .btn-primary {
             width: auto;
@@ -364,36 +399,29 @@
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
         }
-        .transaction-list-card .header-row {
+        .header-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
             margin-bottom: 14px;
         }
-        .transaction-list-card h3 {
-            font-size: 1rem;
-            font-weight: 700;
-            margin-bottom: 0;
-        }
         .btn-print {
-            background: none;
+            background: var(--card-bg);
             border: 1.5px solid var(--border);
             padding: 6px 14px;
             font-size: 0.85rem;
             border-radius: 8px;
             cursor: pointer;
-            transition: all var(--transition);
             display: flex;
             align-items: center;
             gap: 4px;
             color: var(--text-secondary);
-            background: #f8fafc;
+            transition: all var(--transition);
         }
         .btn-print:hover {
-            background: #e2e8f0;
-            color: var(--text);
+            background: var(--primary-hover);
+            color: #fff;
         }
-
         .transaction-item {
             display: flex;
             align-items: center;
@@ -415,7 +443,7 @@
         .transaction-info { flex: 1; min-width: 120px; }
         .transaction-info .desc { font-weight: 600; font-size: 0.9rem; }
         .transaction-info .date { font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px; }
-        .transaction-amount { font-weight: 700; font-size: 0.95rem; white-space: nowrap; }
+        .transaction-amount { font-weight: 700; font-size: 0.95rem; }
         .transaction-amount.income { color: var(--success); }
         .transaction-amount.expense { color: var(--danger); }
         .btn-delete {
@@ -427,7 +455,6 @@
             padding: 8px;
             border-radius: 8px;
             transition: all var(--transition);
-            line-height: 1;
         }
         .btn-delete:hover {
             background: var(--danger-bg);
@@ -441,11 +468,13 @@
         .empty-state .icon { font-size: 2.5rem; margin-bottom: 8px; opacity: 0.6; }
         .empty-state p { font-size: 0.85rem; }
 
-        /* MODAL GANTI PASSWORD */
+        /* ============================================================
+           MODAL GANTI PASSWORD
+           ============================================================ */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(15, 23, 42, 0.6);
+            background: rgba(0,0,0,0.6);
             backdrop-filter: blur(4px);
             display: flex;
             align-items: center;
@@ -457,14 +486,12 @@
         .modal-overlay.hidden {
             display: none;
         }
-
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
-
         .modal-card {
-            background: white;
+            background: var(--card-bg);
             border-radius: var(--radius);
             padding: 28px 24px;
             width: 100%;
@@ -473,52 +500,20 @@
             animation: slideUp 0.25s ease;
             border: 1px solid var(--border);
         }
-
         @keyframes slideUp {
             from { transform: translateY(30px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
-
         .modal-card h3 {
             font-size: 1.1rem;
             font-weight: 700;
             margin-bottom: 6px;
-            letter-spacing: -0.01em;
         }
         .modal-card .modal-subtitle {
             font-size: 0.8rem;
             color: var(--text-secondary);
             margin-bottom: 20px;
         }
-        .modal-card .input-group {
-            margin-bottom: 16px;
-        }
-        .modal-card .btn {
-            width: 100%;
-            margin-top: 4px;
-        }
-        .modal-card .btn-secondary {
-            background: #f1f5f9;
-            color: var(--text);
-            border: 1px solid var(--border);
-            margin-top: 10px;
-        }
-        .modal-card .btn-secondary:hover {
-            background: #e2e8f0;
-        }
-        .modal-error {
-            color: var(--danger);
-            font-size: 0.8rem;
-            min-height: 20px;
-            margin-bottom: 6px;
-        }
-        .modal-success {
-            color: var(--success);
-            font-size: 0.8rem;
-            min-height: 20px;
-            margin-bottom: 6px;
-        }
-        /* Style tambahan untuk dropdown pilihan */
         .password-type-selector {
             display: flex;
             gap: 10px;
@@ -544,7 +539,9 @@
             display: none !important;
         }
 
-        /* STYLE UNTUK HALAMAN CETAK */
+        /* ============================================================
+           CETAK (dipertahankan dari kode lama)
+           ============================================================ */
         @media print {
             body.print-page {
                 background: white;
@@ -587,19 +584,22 @@
                 color: #ef4444;
                 font-weight: 600;
             }
-            .print-total {
-                font-weight: 700;
-                text-align: right;
-                margin-top: 16px;
-            }
         }
     </style>
 </head>
-<body>
+<body class="login-theme"> <!-- Tema awal LOGIN -->
+
+    <!-- ==================== VIDEO BACKGROUND ==================== -->
+    <video id="bgVideoLogin" class="bg-video" muted loop playsinline>
+        <source src="animasi.mp4" type="video/mp4">
+    </video>
+    <video id="bgVideoDashboard" class="bg-video hidden" muted loop playsinline>
+        <source src="dramatis.mp4" type="video/mp4">
+    </video>
+    <div class="bg-overlay"></div>
 
     <div class="app-container" id="appContainer">
-
-        <!-- HALAMAN LOGIN -->
+        <!-- ==================== LOGIN PAGE ==================== -->
         <div class="login-page" id="loginPage">
             <div class="login-card">
                 <div class="login-icon">🔐</div>
@@ -614,12 +614,12 @@
             </div>
         </div>
 
-        <!-- HALAMAN DASHBOARD -->
+        <!-- ==================== DASHBOARD PAGE ==================== -->
         <div class="dashboard-page hidden" id="dashboardPage">
             <div class="dashboard-header">
-                <div class="brand" id="brandLogo" title="Klik untuk ganti password (hanya admin)">
+                <div class="brand" id="brandLogo" title="Klik untuk ganti password (admin)">
                     <div class="logo">💰</div>
-                    <h2>Kas Karang Taruna Ponokawan Rt.08</h2>
+                    <h2>Dashboard Kas</h2>
                 </div>
                 <button class="btn btn-logout" id="logoutBtn">🚪 Logout</button>
             </div>
@@ -669,17 +669,15 @@
             </div>
         </div>
 
-        <!-- MODAL GANTI PASSWORD (ADMIN & VIEWER) -->
+        <!-- ==================== MODAL GANTI PASSWORD ==================== -->
         <div class="modal-overlay hidden" id="passwordModal">
             <div class="modal-card">
                 <h3>🔒 Ganti Password</h3>
                 <p class="modal-subtitle">Pilih tipe password yang ingin diubah</p>
-                <!-- Pilihan tipe password -->
                 <div class="password-type-selector">
                     <button id="selectAdminBtn" class="active">👤 Admin</button>
                     <button id="selectViewerBtn">👥 Viewer</button>
                 </div>
-                <!-- Form untuk Admin -->
                 <div id="adminPasswordForm">
                     <div class="input-group">
                         <input type="password" id="adminOldPassword" placeholder="Password admin saat ini" autocomplete="off">
@@ -694,7 +692,6 @@
                         <button class="toggle-password" type="button">👁️</button>
                     </div>
                 </div>
-                <!-- Form untuk Viewer -->
                 <div id="viewerPasswordForm" class="hidden">
                     <div class="input-group">
                         <input type="password" id="viewerAdminAuth" placeholder="Password admin (verifikasi)" autocomplete="off">
@@ -715,9 +712,9 @@
                 <button class="btn btn-secondary" id="closeModalBtn">Batal</button>
             </div>
         </div>
-
     </div>
 
+    <!-- ==================== SCRIPT ==================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -739,27 +736,18 @@
         // ============================================================
         const DEFAULT_ADMIN_PASSWORD = 'AdminKarangTaruna';
         const DEFAULT_VIEWER_PASSWORD = 'LihatSaja';
-
         const STORAGE_KEY_SESSION = 'kas_session_logged_in';
         const STORAGE_KEY_ROLE = 'kas_user_role';
         const STORAGE_KEY_ADMIN_PASSWORD = 'kas_admin_password';
         const STORAGE_KEY_VIEWER_PASSWORD = 'kas_viewer_password';
 
-        function getAdminPassword() {
-            return localStorage.getItem(STORAGE_KEY_ADMIN_PASSWORD) || DEFAULT_ADMIN_PASSWORD;
-        }
-        function getViewerPassword() {
-            return localStorage.getItem(STORAGE_KEY_VIEWER_PASSWORD) || DEFAULT_VIEWER_PASSWORD;
-        }
-        function saveAdminPassword(newPass) {
-            localStorage.setItem(STORAGE_KEY_ADMIN_PASSWORD, newPass);
-        }
-        function saveViewerPassword(newPass) {
-            localStorage.setItem(STORAGE_KEY_VIEWER_PASSWORD, newPass);
-        }
+        function getAdminPassword() { return localStorage.getItem(STORAGE_KEY_ADMIN_PASSWORD) || DEFAULT_ADMIN_PASSWORD; }
+        function getViewerPassword() { return localStorage.getItem(STORAGE_KEY_VIEWER_PASSWORD) || DEFAULT_VIEWER_PASSWORD; }
+        function saveAdminPassword(newPass) { localStorage.setItem(STORAGE_KEY_ADMIN_PASSWORD, newPass); }
+        function saveViewerPassword(newPass) { localStorage.setItem(STORAGE_KEY_VIEWER_PASSWORD, newPass); }
 
         // ============================================================
-        // REFERENSI DOM
+        // REFERENSI DOM (tetap seperti lama)
         // ============================================================
         const loginPage = document.getElementById('loginPage');
         const dashboardPage = document.getElementById('dashboardPage');
@@ -767,7 +755,6 @@
         const loginBtn = document.getElementById('loginBtn');
         const loginError = document.getElementById('loginError');
         const logoutBtn = document.getElementById('logoutBtn');
-
         const balanceDisplay = document.getElementById('balanceDisplay');
         const incomeDisplay = document.getElementById('incomeDisplay');
         const expenseDisplay = document.getElementById('expenseDisplay');
@@ -779,28 +766,26 @@
         const transactionList = document.getElementById('transactionList');
         const formCard = document.getElementById('formCard');
         const printBtn = document.getElementById('printBtn');
-
         const brandLogo = document.getElementById('brandLogo');
         const passwordModal = document.getElementById('passwordModal');
         const modalError = document.getElementById('modalError');
         const modalSuccess = document.getElementById('modalSuccess');
         const savePasswordBtn = document.getElementById('savePasswordBtn');
         const closeModalBtn = document.getElementById('closeModalBtn');
-
-        // Pilihan tipe password
         const selectAdminBtn = document.getElementById('selectAdminBtn');
         const selectViewerBtn = document.getElementById('selectViewerBtn');
         const adminPasswordForm = document.getElementById('adminPasswordForm');
         const viewerPasswordForm = document.getElementById('viewerPasswordForm');
-
-        // Input admin
         const adminOldPassword = document.getElementById('adminOldPassword');
         const adminNewPassword = document.getElementById('adminNewPassword');
         const adminConfirmPassword = document.getElementById('adminConfirmPassword');
-        // Input viewer
         const viewerAdminAuth = document.getElementById('viewerAdminAuth');
         const viewerNewPassword = document.getElementById('viewerNewPassword');
         const viewerConfirmPassword = document.getElementById('viewerConfirmPassword');
+
+        // VIDEO BACKGROUND
+        const videoLogin = document.getElementById('bgVideoLogin');
+        const videoDashboard = document.getElementById('bgVideoDashboard');
 
         let currentRole = null;
         let transactions = [];
@@ -811,54 +796,43 @@
         const q = query(collection(db, "transactions"), orderBy("createdAt", "desc"));
         onSnapshot(q, (snapshot) => {
             transactions = [];
-            snapshot.forEach((docItem) => {
-                transactions.push({ id: docItem.id, ...docItem.data() });
-            });
-            if (!dashboardPage.classList.contains('hidden')) {
-                refreshDashboard();
-            }
+            snapshot.forEach((docItem) => transactions.push({ id: docItem.id, ...docItem.data() }));
+            if (!dashboardPage.classList.contains('hidden')) refreshDashboard();
         }, (error) => {
             console.error("Error mengambil data:", error);
-            transactionList.innerHTML = `<p style="color:red; text-align:center;">Gagal memuat data. Cek koneksi internet.</p>`;
+            transactionList.innerHTML = `<p style="color:red; text-align:center;">Gagal memuat data.</p>`;
         });
 
         // ============================================================
         // HELPER FUNCTIONS
         // ============================================================
         function formatRupiah(angka) {
-            return new Intl.NumberFormat('id-ID', {
-                style: 'currency', currency: 'IDR', minimumFractionDigits: 2, maximumFractionDigits: 2,
-            }).format(angka);
+            return new Intl.NumberFormat('id-ID', { style:'currency', currency:'IDR', minimumFractionDigits:2, maximumFractionDigits:2 }).format(angka);
         }
-
         function formatAmountInput() {
             let value = amountInput.value.replace(/\D/g, '');
             if (value === '') { amountInput.value = ''; return; }
-            let number = parseInt(value, 10);
-            amountInput.value = number.toLocaleString('id-ID');
+            amountInput.value = parseInt(value, 10).toLocaleString('id-ID');
         }
-
-        function getAmountValue() {
-            let raw = amountInput.value.replace(/\./g, '');
-            return parseInt(raw, 10) || 0;
-        }
-
+        function getAmountValue() { return parseInt(amountInput.value.replace(/\./g, '')) || 0; }
         function formatDateDisplay(dateStr) {
             if (!dateStr) return '-';
-            const d = new Date(dateStr + 'T00:00:00');
-            return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+            return new Date(dateStr + 'T00:00:00').toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' });
         }
-
+        function escapeHTML(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
         function calculateTotals() {
-            let totalIncome = 0; let totalExpense = 0;
-            transactions.forEach((trx) => {
+            let totalIncome = 0, totalExpense = 0;
+            transactions.forEach(trx => {
                 const nominal = Number(trx.amount) || 0;
                 if (trx.type === 'income') totalIncome += nominal;
                 else if (trx.type === 'expense') totalExpense += nominal;
             });
             return { totalIncome, totalExpense, balance: totalIncome - totalExpense };
         }
-
         function updateSummaryDisplay() {
             const { totalIncome, totalExpense, balance } = calculateTotals();
             balanceDisplay.textContent = formatRupiah(balance);
@@ -866,25 +840,13 @@
             expenseDisplay.textContent = formatRupiah(totalExpense);
             balanceDisplay.style.color = balance < 0 ? '#ef4444' : '';
         }
-
-        function escapeHTML(str) {
-            const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
-        }
-
         function renderTransactionList() {
             transactionList.innerHTML = '';
-            if (transactions.length === 0) {
-                transactionList.innerHTML = `
-                    <div class="empty-state">
-                        <div class="icon">📭</div>
-                        <p>Belum ada transaksi tercatat.</p>
-                        <p style="font-size:0.8rem;color:#94a3b8;">Mulai dengan menambahkan transaksi di atas.</p>
-                    </div>`;
+            if (!transactions.length) {
+                transactionList.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>Belum ada transaksi.</p></div>`;
                 return;
             }
-            transactions.forEach((trx) => {
+            transactions.forEach(trx => {
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'transaction-item';
                 const amountClass = trx.type === 'income' ? 'income' : 'expense';
@@ -894,10 +856,8 @@
                         <div class="desc">${escapeHTML(trx.description)}</div>
                         <div class="date">${formatDateDisplay(trx.date)}</div>
                     </div>
-                    <div class="transaction-amount ${amountClass}">
-                        ${prefix} ${formatRupiah(trx.amount)}
-                    </div>
-                    ${currentRole === 'admin' ? `<button class="btn-delete" data-id="${trx.id}" title="Hapus transaksi">🗑️</button>` : ''}
+                    <div class="transaction-amount ${amountClass}">${prefix} ${formatRupiah(trx.amount)}</div>
+                    ${currentRole === 'admin' ? `<button class="btn-delete" data-id="${trx.id}">🗑️</button>` : ''}
                 `;
                 if (currentRole === 'admin') {
                     itemDiv.querySelector('.btn-delete').addEventListener('click', function() {
@@ -907,7 +867,6 @@
                 transactionList.appendChild(itemDiv);
             });
         }
-
         function refreshDashboard() {
             updateSummaryDisplay();
             renderTransactionList();
@@ -922,54 +881,29 @@
             const dateValue = dateInput.value;
             const amount = getAmountValue();
             const type = typeSelect.value;
-
-            if (!description) { alert('⚠️ Keterangan tidak boleh kosong.'); descInput.focus(); return; }
-            if (!dateValue) { alert('⚠️ Harap pilih tanggal transaksi.'); dateInput.focus(); return; }
-            if (isNaN(amount) || amount <= 0) { alert('⚠️ Nominal harus berupa angka positif.'); amountInput.focus(); return; }
-
+            if (!description || !dateValue || amount <= 0) { alert('Lengkapi data dengan benar.'); return; }
             const originalBtnText = addTransactionBtn.innerHTML;
             addTransactionBtn.innerHTML = '⏳ Menyimpan...';
             addTransactionBtn.disabled = true;
-
             try {
                 await addDoc(collection(db, "transactions"), {
-                    description: description,
-                    amount: amount,
-                    type: type,
-                    date: dateValue,
-                    createdAt: Date.now()
+                    description, amount, type, date: dateValue, createdAt: Date.now()
                 });
-                descInput.value = '';
-                dateInput.valueAsDate = new Date();
-                amountInput.value = '';
-                typeSelect.value = 'income';
-                descInput.focus();
-            } catch (error) {
-                alert('Gagal menyimpan data: ' + error.message);
-            } finally {
-                addTransactionBtn.innerHTML = originalBtnText;
-                addTransactionBtn.disabled = false;
-            }
+                descInput.value = ''; dateInput.valueAsDate = new Date(); amountInput.value = '';
+            } catch (error) { alert('Gagal: ' + error.message); }
+            finally { addTransactionBtn.innerHTML = originalBtnText; addTransactionBtn.disabled = false; }
         }
-
         async function deleteTransaction(id) {
             if (currentRole !== 'admin') return;
             if (!confirm('Yakin ingin menghapus transaksi ini?')) return;
-            try {
-                await deleteDoc(doc(db, "transactions", id));
-            } catch (error) {
-                alert('Gagal menghapus: ' + error.message);
-            }
+            await deleteDoc(doc(db, "transactions", id));
         }
 
         // ============================================================
-        // FITUR CETAK
+        // FITUR CETAK (dari kode lama)
         // ============================================================
         function printTransactions() {
-            if (transactions.length === 0) {
-                alert('Tidak ada transaksi untuk dicetak.');
-                return;
-            }
+            if (transactions.length === 0) { alert('Tidak ada transaksi untuk dicetak.'); return; }
             const { totalIncome, totalExpense, balance } = calculateTotals();
             let html = `<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>Cetak Riwayat Transaksi</title><style>
                 body { font-family: 'Inter', sans-serif; padding: 30px; color: #1e293b; }
@@ -1007,7 +941,7 @@
         }
 
         // ============================================================
-        // LOGIN & SESSION (sessionStorage)
+        // LOGIN & SESSION (dengan kontrol tema dan video)
         // ============================================================
         function showDashboard(role) {
             currentRole = role;
@@ -1018,6 +952,12 @@
             formCard.style.display = (role === 'admin') ? 'block' : 'none';
             dateInput.valueAsDate = new Date();
             refreshDashboard();
+            // Ganti tema dan video background
+            document.body.classList.remove('login-theme');
+            document.body.classList.add('dashboard-theme');
+            videoLogin.classList.add('hidden');
+            videoDashboard.classList.remove('hidden');
+            videoDashboard.play().catch(() => {});
         }
 
         function showLogin() {
@@ -1029,6 +969,12 @@
             loginError.textContent = '';
             passwordInput.focus();
             currentRole = null;
+            // Kembalikan tema dan video login
+            document.body.classList.add('login-theme');
+            document.body.classList.remove('dashboard-theme');
+            videoDashboard.classList.add('hidden');
+            videoLogin.classList.remove('hidden');
+            videoLogin.play().catch(() => {});
         }
 
         function handleLogin() {
@@ -1079,100 +1025,51 @@
         });
 
         // ============================================================
-        // MODAL GANTI PASSWORD (ADMIN & VIEWER)
+        // MODAL GANTI PASSWORD (sama seperti kode lama)
         // ============================================================
-        let activePasswordType = 'admin'; // 'admin' atau 'viewer'
-
+        let activePasswordType = 'admin';
         function openPasswordModal() {
-            if (currentRole !== 'admin') {
-                alert('Hanya admin yang dapat mengganti password.');
-                return;
-            }
-            // Reset form
+            if (currentRole !== 'admin') { alert('Hanya admin yang dapat mengganti password.'); return; }
             adminOldPassword.value = ''; adminNewPassword.value = ''; adminConfirmPassword.value = '';
             viewerAdminAuth.value = ''; viewerNewPassword.value = ''; viewerConfirmPassword.value = '';
             modalError.textContent = ''; modalSuccess.textContent = '';
-            // Set semua input ke type password
             document.querySelectorAll('#passwordModal input[type="text"], #passwordModal input[type="password"]').forEach(input => input.setAttribute('type', 'password'));
             document.querySelectorAll('#passwordModal .toggle-password').forEach(btn => btn.textContent = '👁️');
-            // Tampilkan form admin, sembunyikan viewer
             setActivePasswordType('admin');
             passwordModal.classList.remove('hidden');
             adminOldPassword.focus();
         }
-
         function setActivePasswordType(type) {
             activePasswordType = type;
-            if (type === 'admin') {
-                selectAdminBtn.classList.add('active');
-                selectViewerBtn.classList.remove('active');
-                adminPasswordForm.classList.remove('hidden');
-                viewerPasswordForm.classList.add('hidden');
-            } else {
-                selectViewerBtn.classList.add('active');
-                selectAdminBtn.classList.remove('active');
-                viewerPasswordForm.classList.remove('hidden');
-                adminPasswordForm.classList.add('hidden');
-            }
+            selectAdminBtn.classList.toggle('active', type === 'admin');
+            selectViewerBtn.classList.toggle('active', type === 'viewer');
+            adminPasswordForm.classList.toggle('hidden', type !== 'admin');
+            viewerPasswordForm.classList.toggle('hidden', type !== 'viewer');
         }
-
         selectAdminBtn.addEventListener('click', () => setActivePasswordType('admin'));
         selectViewerBtn.addEventListener('click', () => setActivePasswordType('viewer'));
-
-        function closePasswordModal() {
-            passwordModal.classList.add('hidden');
-        }
-
+        function closePasswordModal() { passwordModal.classList.add('hidden'); }
         function handleSavePassword() {
             if (currentRole !== 'admin') return;
-            modalError.textContent = '';
-            modalSuccess.textContent = '';
-
+            modalError.textContent = ''; modalSuccess.textContent = '';
             if (activePasswordType === 'admin') {
-                // Ganti password admin
                 const oldPass = adminOldPassword.value;
                 const newPass = adminNewPassword.value.trim();
                 const confirmPass = adminConfirmPassword.value.trim();
-                if (oldPass !== getAdminPassword()) {
-                    modalError.textContent = '❌ Password admin lama salah.';
-                    return;
-                }
-                if (!newPass || newPass.length < 3) {
-                    modalError.textContent = '❌ Password baru minimal 3 karakter.';
-                    return;
-                }
-                if (newPass !== confirmPass) {
-                    modalError.textContent = '❌ Konfirmasi password tidak cocok.';
-                    return;
-                }
+                if (oldPass !== getAdminPassword()) { modalError.textContent = '❌ Password admin lama salah.'; return; }
+                if (!newPass || newPass.length < 3 || newPass !== confirmPass) { modalError.textContent = '❌ Password baru tidak valid.'; return; }
                 saveAdminPassword(newPass);
                 modalSuccess.textContent = '✅ Password admin berhasil diubah!';
-                adminOldPassword.value = ''; adminNewPassword.value = ''; adminConfirmPassword.value = '';
             } else {
-                // Ganti password viewer
                 const adminAuth = viewerAdminAuth.value;
                 const newPass = viewerNewPassword.value.trim();
                 const confirmPass = viewerConfirmPassword.value.trim();
-                if (adminAuth !== getAdminPassword()) {
-                    modalError.textContent = '❌ Verifikasi password admin salah.';
-                    return;
-                }
-                if (!newPass || newPass.length < 3) {
-                    modalError.textContent = '❌ Password viewer baru minimal 3 karakter.';
-                    return;
-                }
-                if (newPass !== confirmPass) {
-                    modalError.textContent = '❌ Konfirmasi password viewer tidak cocok.';
-                    return;
-                }
+                if (adminAuth !== getAdminPassword()) { modalError.textContent = '❌ Verifikasi password admin salah.'; return; }
+                if (!newPass || newPass.length < 3 || newPass !== confirmPass) { modalError.textContent = '❌ Password viewer baru tidak valid.'; return; }
                 saveViewerPassword(newPass);
                 modalSuccess.textContent = '✅ Password viewer berhasil diubah!';
-                viewerAdminAuth.value = ''; viewerNewPassword.value = ''; viewerConfirmPassword.value = '';
             }
-            setTimeout(() => {
-                closePasswordModal();
-                modalSuccess.textContent = '';
-            }, 1500);
+            setTimeout(() => { closePasswordModal(); modalSuccess.textContent = ''; }, 1500);
         }
 
         // ============================================================
@@ -1181,7 +1078,6 @@
         loginBtn.addEventListener('click', handleLogin);
         passwordInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); handleLogin(); } });
         logoutBtn.addEventListener('click', handleLogout);
-
         amountInput?.addEventListener('input', formatAmountInput);
         amountInput?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addTransaction(); } });
         addTransactionBtn?.addEventListener('click', addTransaction);
@@ -1193,9 +1089,7 @@
             }
         });
         dateInput?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addTransaction(); } });
-
         printBtn.addEventListener('click', printTransactions);
-
         brandLogo.addEventListener('click', openPasswordModal);
         savePasswordBtn.addEventListener('click', handleSavePassword);
         closeModalBtn.addEventListener('click', closePasswordModal);
