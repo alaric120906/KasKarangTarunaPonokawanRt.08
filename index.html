@@ -6,7 +6,7 @@
     <title>Manajemen Kas Keuangan</title>
     <style>
         /* ============================================================
-           CSS RESET & BASE (sama seperti sebelumnya)
+           CSS RESET & BASE
            ============================================================ */
         *,
         *::before,
@@ -518,14 +518,33 @@
             min-height: 20px;
             margin-bottom: 6px;
         }
+        /* Style tambahan untuk dropdown pilihan */
+        .password-type-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .password-type-selector button {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: #f8fafc;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+        .password-type-selector button.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
 
         .hidden {
             display: none !important;
         }
 
-        /* ============================================================
-           STYLE UNTUK HALAMAN CETAK (jendela baru)
-           ============================================================ */
+        /* STYLE UNTUK HALAMAN CETAK */
         @media print {
             body.print-page {
                 background: white;
@@ -620,7 +639,6 @@
                 </div>
             </div>
 
-            <!-- Form Tambah Transaksi: hanya muncul untuk admin -->
             <div class="form-card" id="formCard" style="display: none;">
                 <h3>✍️ Catat Transaksi Baru</h3>
                 <div class="form-row">
@@ -640,10 +658,7 @@
             <div class="transaction-list-card">
                 <div class="header-row">
                     <h3>📋 Riwayat Transaksi</h3>
-                    <!-- TOMBOL CETAK -->
-                    <button class="btn-print" id="printBtn">
-                        🖨️ Cetak
-                    </button>
+                    <button class="btn-print" id="printBtn">🖨️ Cetak</button>
                 </div>
                 <div id="transactionList">
                     <div class="empty-state">
@@ -654,33 +669,55 @@
             </div>
         </div>
 
-        <!-- MODAL GANTI PASSWORD (hanya admin) -->
+        <!-- MODAL GANTI PASSWORD (ADMIN & VIEWER) -->
         <div class="modal-overlay hidden" id="passwordModal">
             <div class="modal-card">
-                <h3>🔒 Ganti Password Admin</h3>
-                <p class="modal-subtitle">Hanya admin yang bisa mengubah password</p>
-                <div class="input-group">
-                    <input type="password" id="oldPasswordInput" placeholder="Password lama" autocomplete="off">
-                    <button class="toggle-password" type="button">👁️</button>
+                <h3>🔒 Ganti Password</h3>
+                <p class="modal-subtitle">Pilih tipe password yang ingin diubah</p>
+                <!-- Pilihan tipe password -->
+                <div class="password-type-selector">
+                    <button id="selectAdminBtn" class="active">👤 Admin</button>
+                    <button id="selectViewerBtn">👥 Viewer</button>
                 </div>
-                <div class="input-group">
-                    <input type="password" id="newPasswordInput" placeholder="Password baru" autocomplete="off">
-                    <button class="toggle-password" type="button">👁️</button>
+                <!-- Form untuk Admin -->
+                <div id="adminPasswordForm">
+                    <div class="input-group">
+                        <input type="password" id="adminOldPassword" placeholder="Password admin saat ini" autocomplete="off">
+                        <button class="toggle-password" type="button">👁️</button>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="adminNewPassword" placeholder="Password admin baru" autocomplete="off">
+                        <button class="toggle-password" type="button">👁️</button>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="adminConfirmPassword" placeholder="Konfirmasi password admin baru" autocomplete="off">
+                        <button class="toggle-password" type="button">👁️</button>
+                    </div>
                 </div>
-                <div class="input-group">
-                    <input type="password" id="confirmPasswordInput" placeholder="Konfirmasi password baru" autocomplete="off">
-                    <button class="toggle-password" type="button">👁️</button>
+                <!-- Form untuk Viewer -->
+                <div id="viewerPasswordForm" class="hidden">
+                    <div class="input-group">
+                        <input type="password" id="viewerAdminAuth" placeholder="Password admin (verifikasi)" autocomplete="off">
+                        <button class="toggle-password" type="button">👁️</button>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="viewerNewPassword" placeholder="Password viewer baru" autocomplete="off">
+                        <button class="toggle-password" type="button">👁️</button>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="viewerConfirmPassword" placeholder="Konfirmasi password viewer baru" autocomplete="off">
+                        <button class="toggle-password" type="button">👁️</button>
+                    </div>
                 </div>
                 <div class="modal-error" id="modalError"></div>
                 <div class="modal-success" id="modalSuccess"></div>
-                <button class="btn btn-primary" id="savePasswordBtn">💾 Simpan Password Baru</button>
+                <button class="btn btn-primary" id="savePasswordBtn">💾 Simpan Password</button>
                 <button class="btn btn-secondary" id="closeModalBtn">Batal</button>
             </div>
         </div>
 
     </div>
 
-    <!-- SCRIPT FIREBASE & LOGIKA -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -745,13 +782,25 @@
 
         const brandLogo = document.getElementById('brandLogo');
         const passwordModal = document.getElementById('passwordModal');
-        const oldPasswordInput = document.getElementById('oldPasswordInput');
-        const newPasswordInput = document.getElementById('newPasswordInput');
-        const confirmPasswordInput = document.getElementById('confirmPasswordInput');
         const modalError = document.getElementById('modalError');
         const modalSuccess = document.getElementById('modalSuccess');
         const savePasswordBtn = document.getElementById('savePasswordBtn');
         const closeModalBtn = document.getElementById('closeModalBtn');
+
+        // Pilihan tipe password
+        const selectAdminBtn = document.getElementById('selectAdminBtn');
+        const selectViewerBtn = document.getElementById('selectViewerBtn');
+        const adminPasswordForm = document.getElementById('adminPasswordForm');
+        const viewerPasswordForm = document.getElementById('viewerPasswordForm');
+
+        // Input admin
+        const adminOldPassword = document.getElementById('adminOldPassword');
+        const adminNewPassword = document.getElementById('adminNewPassword');
+        const adminConfirmPassword = document.getElementById('adminConfirmPassword');
+        // Input viewer
+        const viewerAdminAuth = document.getElementById('viewerAdminAuth');
+        const viewerNewPassword = document.getElementById('viewerNewPassword');
+        const viewerConfirmPassword = document.getElementById('viewerConfirmPassword');
 
         let currentRole = null;
         let transactions = [];
@@ -865,7 +914,7 @@
         }
 
         // ============================================================
-        // FIREBASE CRUD (hanya admin)
+        // FIREBASE CRUD
         // ============================================================
         async function addTransaction() {
             if (currentRole !== 'admin') return;
@@ -914,195 +963,58 @@
         }
 
         // ============================================================
-        // FITUR CETAK RIWAYAT TRANSAKSI
+        // FITUR CETAK
         // ============================================================
         function printTransactions() {
             if (transactions.length === 0) {
                 alert('Tidak ada transaksi untuk dicetak.');
                 return;
             }
-
             const { totalIncome, totalExpense, balance } = calculateTotals();
-            
-            // Bangun konten HTML untuk jendela cetak
-            let html = `
-                <!DOCTYPE html>
-                <html lang="id">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Cetak Riwayat Transaksi</title>
-                    <style>
-                        body {
-                            font-family: 'Inter', 'Segoe UI', sans-serif;
-                            padding: 30px;
-                            color: #1e293b;
-                            line-height: 1.5;
-                            background: white;
-                        }
-                        .print-header {
-                            text-align: center;
-                            margin-bottom: 24px;
-                            border-bottom: 2px solid #4f46e5;
-                            padding-bottom: 16px;
-                        }
-                        .print-header h2 {
-                            font-size: 1.6rem;
-                            margin: 0 0 4px;
-                            color: #4f46e5;
-                        }
-                        .print-header p {
-                            margin: 0;
-                            color: #64748b;
-                        }
-                        .summary-box {
-                            display: flex;
-                            justify-content: space-between;
-                            flex-wrap: wrap;
-                            gap: 12px;
-                            margin-bottom: 24px;
-                        }
-                        .summary-item {
-                            flex: 1;
-                            min-width: 100px;
-                            background: #f8fafc;
-                            padding: 12px;
-                            border-radius: 8px;
-                            text-align: center;
-                            border: 1px solid #e2e8f0;
-                        }
-                        .summary-item .label {
-                            font-size: 0.75rem;
-                            text-transform: uppercase;
-                            color: #64748b;
-                            font-weight: 600;
-                        }
-                        .summary-item .value {
-                            font-size: 1.2rem;
-                            font-weight: 700;
-                            margin-top: 2px;
-                        }
-                        table {
-                            width: 100%;
-                            border-collapse: collapse;
-                            margin-bottom: 20px;
-                        }
-                        th, td {
-                            padding: 10px 12px;
-                            border: 1px solid #ddd;
-                            text-align: left;
-                            font-size: 0.9rem;
-                        }
-                        th {
-                            background: #f1f5f9;
-                            font-weight: 600;
-                        }
-                        .income {
-                            color: #10b981;
-                            font-weight: 600;
-                        }
-                        .expense {
-                            color: #ef4444;
-                            font-weight: 600;
-                        }
-                        .total-row {
-                            font-weight: 700;
-                            background: #f8fafc;
-                        }
-                        .footer {
-                            text-align: right;
-                            margin-top: 16px;
-                            font-size: 0.8rem;
-                            color: #64748b;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="print-header">
-                        <h2>💰 Kas Karang Taruna Ponokawan Rt.08</h2>
-                        <p>Laporan Riwayat Transaksi</p>
-                        <p>Dicetak pada: ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
-                    </div>
-                    <div class="summary-box">
-                        <div class="summary-item">
-                            <div class="label">Total Pemasukan</div>
-                            <div class="value income">${formatRupiah(totalIncome)}</div>
-                        </div>
-                        <div class="summary-item">
-                            <div class="label">Total Pengeluaran</div>
-                            <div class="value expense">${formatRupiah(totalExpense)}</div>
-                        </div>
-                        <div class="summary-item">
-                            <div class="label">Saldo Akhir</div>
-                            <div class="value" style="color: ${balance < 0 ? '#ef4444' : '#4f46e5'}">${formatRupiah(balance)}</div>
-                        </div>
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>No</th>
-                                <th>Tanggal</th>
-                                <th>Keterangan</th>
-                                <th>Jenis</th>
-                                <th>Nominal</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-
-            // Loop transaksi (urutan asli dari Firebase)
-            transactions.forEach((trx, index) => {
-                const typeLabel = trx.type === 'income' ? 'Pemasukan' : 'Pengeluaran';
+            let html = `<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>Cetak Riwayat Transaksi</title><style>
+                body { font-family: 'Inter', sans-serif; padding: 30px; color: #1e293b; }
+                .print-header { text-align: center; border-bottom: 2px solid #4f46e5; padding-bottom: 16px; margin-bottom: 24px; }
+                .print-header h2 { font-size: 1.6rem; color: #4f46e5; }
+                .summary-box { display: flex; gap: 12px; margin-bottom: 24px; }
+                .summary-item { flex:1; background:#f8fafc; padding:12px; border-radius:8px; text-align:center; }
+                .summary-item .label { font-size:0.75rem; text-transform:uppercase; color:#64748b; }
+                .summary-item .value { font-size:1.2rem; font-weight:700; }
+                table { width:100%; border-collapse:collapse; }
+                th, td { padding:10px; border:1px solid #ddd; }
+                th { background:#f1f5f9; }
+                .income { color:#10b981; font-weight:600; }
+                .expense { color:#ef4444; font-weight:600; }
+            </style></head><body>
+                <div class="print-header"><h2>💰 Kas Karang Taruna Ponokawan Rt.08</h2><p>Laporan Riwayat Transaksi</p></div>
+                <div class="summary-box">
+                    <div class="summary-item"><div class="label">Pemasukan</div><div class="value income">${formatRupiah(totalIncome)}</div></div>
+                    <div class="summary-item"><div class="label">Pengeluaran</div><div class="value expense">${formatRupiah(totalExpense)}</div></div>
+                    <div class="summary-item"><div class="label">Saldo</div><div class="value" style="color:${balance<0?'#ef4444':'#4f46e5'}">${formatRupiah(balance)}</div></div>
+                </div>
+                <table><thead><tr><th>No</th><th>Tanggal</th><th>Keterangan</th><th>Jenis</th><th>Nominal</th></tr></thead><tbody>`;
+            transactions.forEach((trx, i) => {
                 const nominalClass = trx.type === 'income' ? 'income' : 'expense';
-                const nominalPrefix = trx.type === 'income' ? '+' : '-';
-                html += `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${formatDateDisplay(trx.date)}</td>
-                        <td>${escapeHTML(trx.description)}</td>
-                        <td>${typeLabel}</td>
-                        <td class="${nominalClass}">${nominalPrefix} ${formatRupiah(trx.amount)}</td>
-                    </tr>
-                `;
+                const prefix = trx.type === 'income' ? '+' : '-';
+                html += `<tr><td>${i+1}</td><td>${formatDateDisplay(trx.date)}</td><td>${escapeHTML(trx.description)}</td><td>${trx.type==='income'?'Pemasukan':'Pengeluaran'}</td><td class="${nominalClass}">${prefix} ${formatRupiah(trx.amount)}</td></tr>`;
             });
-
-            html += `
-                        </tbody>
-                    </table>
-                    <div class="footer">
-                        © ${new Date().getFullYear()} Kas Karang Taruna Ponokawan Rt.08
-                    </div>
-                </body>
-                </html>
-            `;
-
-            // Buka jendela baru dan cetak
+            html += `</tbody></table></body></html>`;
             const printWindow = window.open('', '_blank', 'width=800,height=600');
-            if (!printWindow) {
-                alert('Pop-up diblokir. Izinkan pop-up untuk mencetak.');
-                return;
-            }
+            if (!printWindow) { alert('Izinkan pop-up untuk mencetak.'); return; }
             printWindow.document.write(html);
             printWindow.document.close();
             printWindow.focus();
-            // Tunggu sebentar agar konten selesai dimuat, lalu cetak
-            setTimeout(() => {
-                printWindow.print();
-                // Tutup jendela setelah cetak (opsional, beberapa browser menutup otomatis)
-                // printWindow.close();
-            }, 500);
+            setTimeout(() => printWindow.print(), 500);
         }
 
         // ============================================================
-        // LOGIN & SESSION
+        // LOGIN & SESSION (sessionStorage)
         // ============================================================
         function showDashboard(role) {
             currentRole = role;
             loginPage.classList.add('hidden');
             dashboardPage.classList.remove('hidden');
-            localStorage.setItem(STORAGE_KEY_SESSION, 'true');
-            localStorage.setItem(STORAGE_KEY_ROLE, role);
-
+            sessionStorage.setItem(STORAGE_KEY_SESSION, 'true');
+            sessionStorage.setItem(STORAGE_KEY_ROLE, role);
             formCard.style.display = (role === 'admin') ? 'block' : 'none';
             dateInput.valueAsDate = new Date();
             refreshDashboard();
@@ -1111,8 +1023,8 @@
         function showLogin() {
             dashboardPage.classList.add('hidden');
             loginPage.classList.remove('hidden');
-            localStorage.removeItem(STORAGE_KEY_SESSION);
-            localStorage.removeItem(STORAGE_KEY_ROLE);
+            sessionStorage.removeItem(STORAGE_KEY_SESSION);
+            sessionStorage.removeItem(STORAGE_KEY_ROLE);
             passwordInput.value = '';
             loginError.textContent = '';
             passwordInput.focus();
@@ -1140,7 +1052,7 @@
                     loginBtn.disabled = false;
                 }, 400);
             } else {
-                loginError.textContent = '❌ Password salah. Silakan coba lagi.';
+                loginError.textContent = '❌ Password salah.';
                 passwordInput.style.animation = 'shake 0.4s ease';
                 passwordInput.focus();
                 passwordInput.select();
@@ -1153,7 +1065,7 @@
         }
 
         // ============================================================
-        // TOGGLE PASSWORD VISIBILITY
+        // TOGGLE PASSWORD
         // ============================================================
         document.querySelectorAll('.toggle-password').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -1167,50 +1079,100 @@
         });
 
         // ============================================================
-        // MODAL GANTI PASSWORD (hanya admin)
+        // MODAL GANTI PASSWORD (ADMIN & VIEWER)
         // ============================================================
+        let activePasswordType = 'admin'; // 'admin' atau 'viewer'
+
         function openPasswordModal() {
             if (currentRole !== 'admin') {
                 alert('Hanya admin yang dapat mengganti password.');
                 return;
             }
-            oldPasswordInput.value = ''; newPasswordInput.value = ''; confirmPasswordInput.value = '';
+            // Reset form
+            adminOldPassword.value = ''; adminNewPassword.value = ''; adminConfirmPassword.value = '';
+            viewerAdminAuth.value = ''; viewerNewPassword.value = ''; viewerConfirmPassword.value = '';
             modalError.textContent = ''; modalSuccess.textContent = '';
-            [oldPasswordInput, newPasswordInput, confirmPasswordInput].forEach(input => input.setAttribute('type', 'password'));
+            // Set semua input ke type password
+            document.querySelectorAll('#passwordModal input[type="text"], #passwordModal input[type="password"]').forEach(input => input.setAttribute('type', 'password'));
             document.querySelectorAll('#passwordModal .toggle-password').forEach(btn => btn.textContent = '👁️');
+            // Tampilkan form admin, sembunyikan viewer
+            setActivePasswordType('admin');
             passwordModal.classList.remove('hidden');
-            oldPasswordInput.focus();
+            adminOldPassword.focus();
         }
 
-        function closePasswordModal() { passwordModal.classList.add('hidden'); }
+        function setActivePasswordType(type) {
+            activePasswordType = type;
+            if (type === 'admin') {
+                selectAdminBtn.classList.add('active');
+                selectViewerBtn.classList.remove('active');
+                adminPasswordForm.classList.remove('hidden');
+                viewerPasswordForm.classList.add('hidden');
+            } else {
+                selectViewerBtn.classList.add('active');
+                selectAdminBtn.classList.remove('active');
+                viewerPasswordForm.classList.remove('hidden');
+                adminPasswordForm.classList.add('hidden');
+            }
+        }
+
+        selectAdminBtn.addEventListener('click', () => setActivePasswordType('admin'));
+        selectViewerBtn.addEventListener('click', () => setActivePasswordType('viewer'));
+
+        function closePasswordModal() {
+            passwordModal.classList.add('hidden');
+        }
 
         function handleSavePassword() {
             if (currentRole !== 'admin') return;
-            modalError.textContent = ''; modalSuccess.textContent = '';
-            const oldPass = oldPasswordInput.value;
-            const newPass = newPasswordInput.value.trim();
-            const confirmPass = confirmPasswordInput.value.trim();
+            modalError.textContent = '';
+            modalSuccess.textContent = '';
 
-            if (oldPass !== getAdminPassword()) {
-                modalError.textContent = '❌ Password lama salah.';
-                oldPasswordInput.focus();
-                return;
+            if (activePasswordType === 'admin') {
+                // Ganti password admin
+                const oldPass = adminOldPassword.value;
+                const newPass = adminNewPassword.value.trim();
+                const confirmPass = adminConfirmPassword.value.trim();
+                if (oldPass !== getAdminPassword()) {
+                    modalError.textContent = '❌ Password admin lama salah.';
+                    return;
+                }
+                if (!newPass || newPass.length < 3) {
+                    modalError.textContent = '❌ Password baru minimal 3 karakter.';
+                    return;
+                }
+                if (newPass !== confirmPass) {
+                    modalError.textContent = '❌ Konfirmasi password tidak cocok.';
+                    return;
+                }
+                saveAdminPassword(newPass);
+                modalSuccess.textContent = '✅ Password admin berhasil diubah!';
+                adminOldPassword.value = ''; adminNewPassword.value = ''; adminConfirmPassword.value = '';
+            } else {
+                // Ganti password viewer
+                const adminAuth = viewerAdminAuth.value;
+                const newPass = viewerNewPassword.value.trim();
+                const confirmPass = viewerConfirmPassword.value.trim();
+                if (adminAuth !== getAdminPassword()) {
+                    modalError.textContent = '❌ Verifikasi password admin salah.';
+                    return;
+                }
+                if (!newPass || newPass.length < 3) {
+                    modalError.textContent = '❌ Password viewer baru minimal 3 karakter.';
+                    return;
+                }
+                if (newPass !== confirmPass) {
+                    modalError.textContent = '❌ Konfirmasi password viewer tidak cocok.';
+                    return;
+                }
+                saveViewerPassword(newPass);
+                modalSuccess.textContent = '✅ Password viewer berhasil diubah!';
+                viewerAdminAuth.value = ''; viewerNewPassword.value = ''; viewerConfirmPassword.value = '';
             }
-            if (!newPass || newPass.length < 3) {
-                modalError.textContent = '❌ Password baru minimal 3 karakter.';
-                newPasswordInput.focus();
-                return;
-            }
-            if (newPass !== confirmPass) {
-                modalError.textContent = '❌ Konfirmasi password tidak cocok.';
-                confirmPasswordInput.focus();
-                return;
-            }
-
-            saveAdminPassword(newPass);
-            modalSuccess.textContent = '✅ Password admin berhasil diubah!';
-            oldPasswordInput.value = ''; newPasswordInput.value = ''; confirmPasswordInput.value = '';
-            setTimeout(() => { closePasswordModal(); modalSuccess.textContent = ''; }, 1500);
+            setTimeout(() => {
+                closePasswordModal();
+                modalSuccess.textContent = '';
+            }, 1500);
         }
 
         // ============================================================
@@ -1232,7 +1194,6 @@
         });
         dateInput?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addTransaction(); } });
 
-        // Tombol Cetak
         printBtn.addEventListener('click', printTransactions);
 
         brandLogo.addEventListener('click', openPasswordModal);
@@ -1244,8 +1205,8 @@
         // ============================================================
         // INISIALISASI
         // ============================================================
-        const isLoggedIn = localStorage.getItem(STORAGE_KEY_SESSION) === 'true';
-        const savedRole = localStorage.getItem(STORAGE_KEY_ROLE);
+        const isLoggedIn = sessionStorage.getItem(STORAGE_KEY_SESSION) === 'true';
+        const savedRole = sessionStorage.getItem(STORAGE_KEY_ROLE);
         if (isLoggedIn && (savedRole === 'admin' || savedRole === 'viewer')) {
             showDashboard(savedRole);
         } else {
